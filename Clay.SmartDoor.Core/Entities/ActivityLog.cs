@@ -1,4 +1,6 @@
-﻿namespace Clay.SmartDoor.Core.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Clay.SmartDoor.Core.Entities
 {
     public class ActivityLog
     {
@@ -9,7 +11,7 @@
         public string DoorId { get; set; } = Guid.NewGuid().ToString();
         public string Building { get; set; } = string.Empty;
         public string Floor { get; set; } = string.Empty;
-        public string Tag { get; set; } = string.Empty;
+        public string DoorTag { get; set; } = string.Empty;
 
         #region Navigational Properties
         public AppUser User { get; set; }

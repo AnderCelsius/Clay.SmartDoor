@@ -6,8 +6,10 @@ namespace Clay.SmartDoor.Core.Entities
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
+        public long StaffId { get; set; }
+        public string CreatedBy { get; set; } = string.Empty;
         public bool IsActive { get; set; }
-        public DateTime Created { get; set; }
+        public DateTime CreatedDate { get; set; }
         public DateTime LastModified { get; set; }
 
         #region Navigational Properties

@@ -1,9 +1,17 @@
-﻿namespace Clay.SmartDoor.Core.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Clay.SmartDoor.Core.Entities
 {
     public class BaseEntity
     {
-        public long Id { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime LastModifiedDate { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public string CreatorBy { get; set; } = string.Empty;
+ 
+        [Column("Date_Created")]
+        public DateTime CreatedAt { get; set; }
+
+        [Column("Last_Modified_Date")]
+        public DateTime LastModified { get; set; }
     }
 }
