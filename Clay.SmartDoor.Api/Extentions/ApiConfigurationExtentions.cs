@@ -111,9 +111,9 @@ namespace Clay.SmartDoor.Api.Extentions
 
             services.AddAuthorization(options =>
             {
-                //options.AddPolicy("OrganizationAdmin", policy =>
-                //    policy.RequireRole(SmartDoorJwtService.JwtScopeOrganizationAdmin)
-                //);
+                options.AddPolicy("Door.All", policy =>
+                    policy.RequireClaim("Permission", "Permissions.Door.All")
+                );
             });
 
             services.AddHttpContextAccessor();
