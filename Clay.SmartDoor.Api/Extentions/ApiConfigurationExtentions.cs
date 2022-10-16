@@ -13,8 +13,18 @@ using System.Text;
 
 namespace Clay.SmartDoor.Api.Extentions
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public static class ApiConfigurationExtentions
     {
+        /// <summary>
+        /// Adds the JSON configuration provider to the builder
+        /// depending on the current environment.
+        /// </summary>
+        /// <param name="isDevelopment"></param>
+        /// <returns>An <seealso cref="IConfigurationRoot"/> with 
+        /// keys and values from the registered sources</returns>
         public static IConfiguration GetConfig(bool isDevelopment)
         {
             return isDevelopment ? new ConfigurationBuilder()
@@ -27,6 +37,12 @@ namespace Clay.SmartDoor.Api.Extentions
             .Build();
         }
 
+        /// <summary>
+        /// Adds and configures the identity system for <seealso cref="AppUser"/>
+        /// and <seealso cref="IdentityRole"/>. Then uses the IdentityBuilder to 
+        /// add EnityFramework implementation for identityb information stores.
+        /// </summary>
+        /// <param name="services"></param>
         public static void AddSmartDoorIdentity(this IServiceCollection services)
         {
             var builder = services.AddIdentity<AppUser, IdentityRole>(options =>
@@ -42,11 +58,21 @@ namespace Clay.SmartDoor.Api.Extentions
             builder.AddEntityFrameworkStores<SmartDoorContext>()
                 .AddDefaultTokenProviders();
         }
+
+        /// <summary>
+        /// Registers custom permission policy provider.
+        /// </summary>
+        /// <param name="services"></param>
         public static void AddSmartDoorPermissionPolicy(this IServiceCollection services)
         {
             services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
             services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
         }
+
+        /// <summary>
+        /// Configures OpenApi documentationfor the project.
+        /// </summary>
+        /// <param name="services"></param>
         public static void AddOpenApiDocumentation(this IServiceCollection services)
         {
             services.AddEndpointsApiExplorer();
@@ -90,10 +116,16 @@ namespace Clay.SmartDoor.Api.Extentions
             });
 
                 var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-                c.IncludeXmlComments(xmlFilename);
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFilename);
+                c.IncludeXmlComments(xmlPath);
             });
         }
+
+        /// <summary>
+        /// Configures JWT services and adds Authorization with the necessary policy.
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="configuration"></param>
         public static void AddJwtAuthentication(
             this IServiceCollection services, 
             IConfiguration configuration)
@@ -136,18 +168,32 @@ namespace Clay.SmartDoor.Api.Extentions
 
             services.AddHttpContextAccessor();
         }
+
+        /// <summary>
+        /// Regiters the SwaggerUI middleware
+        /// </summary>
+        /// <param name="app"></param>
         public static void UseOpenApiDocumentation(this WebApplication app)
         {
             app.UseSwagger();
             app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartDoor API V1"); });
         }
 
+        /// <summary>
+        /// Adds enpoint to map controleer actions.
+        /// </summary>
+        /// <param name="app"></param>
         public static void MapSmartDoorControllers(this WebApplication app)
         {
             app.MapControllers();
             app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
         }
 
+
+        /// <summary>
+        /// Seeds necessary data if database is empty.
+        /// </summary>
+        /// <param name="app"></param>
         public static void EnsureDatabaseSetup(this WebApplication app)
         {
             using var scope = app.Services.CreateScope();
@@ -159,6 +205,11 @@ namespace Clay.SmartDoor.Api.Extentions
             SmartDoorDataSeeder.SeedAsync(db, userManager, roleManager).GetAwaiter().GetResult(); ;
         }
 
+
+        /// <summary>
+        /// registers <seealso cref="Serilog"/> for the project
+        /// </summary>
+        /// <param name="services"></param>
         public static void AddSeriLog(this IServiceCollection services)
         {
             services.AddSingleton(Log.Logger);

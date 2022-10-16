@@ -3,6 +3,7 @@ using System;
 using Clay.SmartDoor.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Clay.SmartDoor.Infrastructure.Migrations
 {
     [DbContext(typeof(SmartDoorContext))]
-    partial class SmartDoorContextModelSnapshot : ModelSnapshot
+    [Migration("20221016120916_UpdatedUserModel")]
+    partial class UpdatedUserModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

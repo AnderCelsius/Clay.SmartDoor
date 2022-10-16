@@ -1,5 +1,6 @@
 ﻿using Clay.SmartDoor.Core.Entities;
 using Microsoft.AspNetCore.Identity;
+using Serilog;
 
 namespace Clay.SmartDoor.Infrastructure.Data
 {
@@ -14,7 +15,14 @@ namespace Clay.SmartDoor.Infrastructure.Data
 
             if (!context.Users.Any())
             {
+                Log.Information("Preparing to seed data...");
 
+                await SeedData.SeedDefaultRolesAsync(roleManager);
+                await SeedData.SeedBasicUsersAsync(userManager);
+                await SeedData.SeedAdminUsersAsync(userManager);
+                await SeedData.SeedSuperAdminUsersAsync(userManager, roleManager);
+
+                Log.Information("Seeding Completed.");
             }
         }
     }
