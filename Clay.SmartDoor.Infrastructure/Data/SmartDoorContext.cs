@@ -121,11 +121,6 @@ namespace Clay.SmartDoor.Infrastructure.Data
                 .IsRequired();
 
             modelBuilder.Entity<AppUser>()
-                .Property(au => au.StaffId)
-                .HasMaxLength(100)
-                .IsRequired();
-
-            modelBuilder.Entity<AppUser>()
                 .Property(au => au.CreatedDate)
                 .IsRequired();
 

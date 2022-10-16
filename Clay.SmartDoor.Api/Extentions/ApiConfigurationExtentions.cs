@@ -1,7 +1,9 @@
 ﻿using Clay.SmartDoor.Api.Identity;
+using Clay.SmartDoor.Core.Entities;
 using Clay.SmartDoor.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -25,7 +27,22 @@ namespace Clay.SmartDoor.Api.Extentions
             .Build();
         }
 
-        public static void AddSmartDoorServices(this IServiceCollection services)
+        public static void AddSmartDoorIdentity(this IServiceCollection services)
+        {
+            var builder = services.AddIdentity<AppUser, IdentityRole>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+                options.Password.RequireDigit = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequiredLength = 8;
+                options.SignIn.RequireConfirmedEmail = true;
+            });
+            builder = new IdentityBuilder(builder.UserType, typeof(IdentityRole), services);
+            builder.AddEntityFrameworkStores<SmartDoorContext>()
+                .AddDefaultTokenProviders();
+        }
+        public static void AddSmartDoorPermissionPolicy(this IServiceCollection services)
         {
             services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
             services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
@@ -136,8 +153,10 @@ namespace Clay.SmartDoor.Api.Extentions
             using var scope = app.Services.CreateScope();
             var services = scope.ServiceProvider;
             var db = services.GetRequiredService<SmartDoorContext>();
-            db.Database.EnsureCreated();
-            SmartDoorDataSeeder.Seed(db);
+            var userManager = services.GetRequiredService<UserManager<AppUser>>();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+            SmartDoorDataSeeder.SeedAsync(db, userManager, roleManager).GetAwaiter().GetResult(); ;
         }
 
         public static void AddSeriLog(this IServiceCollection services)

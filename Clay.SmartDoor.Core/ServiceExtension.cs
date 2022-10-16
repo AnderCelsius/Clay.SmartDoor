@@ -8,7 +8,7 @@ namespace Clay.SmartDoor.Core
 {
     public static class ServiceExtension
     {
-        public static void AddDomainLayer(this IServiceCollection services)
+        public static void AddCoreServices(this IServiceCollection services)
         {
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 

@@ -1,4 +1,5 @@
 using Clay.SmartDoor.Api.Extentions;
+using Clay.SmartDoor.Core;
 using Clay.SmartDoor.Infrastructure;
 using Serilog;
 using System.Text.Json.Serialization;
@@ -21,11 +22,13 @@ try
     builder.Services.AddControllers()
             .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
-    builder.Services.AddSmartDoorServices();
     builder.Services.AddSeriLog();
+    builder.Services.AddSmartDoorPermissionPolicy();
     builder.Services.AddInfrastructureServices(config);
+    builder.Services.AddCoreServices();
     builder.Services.AddOpenApiDocumentation();
     builder.Services.AddJwtAuthentication(config);
+    builder.Services.AddSmartDoorIdentity();
 
 
     var app = builder.Build();
@@ -48,7 +51,7 @@ try
 }
 catch (Exception e)
 {
-    Log.Fatal(e.Message, e.StackTrace, "The application failed to start");
+    Log.Fatal(e, e.Message, "The application failed to start");
 }
 finally
 {

@@ -33,7 +33,7 @@ namespace Clay.SmartDoor.Core.Services
                 var activityLog = new ActivityLog
                 {
                     Time = DateTime.Now,
-                    Description = ActivityDescriptions.DoorCreated,
+                    Description = ActivityDescriptions.Door_Created,
                     ActionBy = model.CreatorId,
                     DoorId = door.Id,
                     Building = model.Building,
@@ -47,13 +47,13 @@ namespace Clay.SmartDoor.Core.Services
                 var saveResult = await _unitOfWork.SaveAsync();
                 _logger.Information(saveResult > 0 ? "Changes persisted to database" : "Failed to save");
 
-                return ApiResponse<string>.Success(ApiResponseMesage.CreatedSuccessfully, door.Id);
+                return ApiResponse<string>.Success(ApiResponseMesage.Created_Successfully, door.Id);
 
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, ex.Message);
-                return ApiResponse<string>.Fail(ApiResponseMesage.FailedtoCreate);
+                return ApiResponse<string>.Fail(ApiResponseMesage.Failed_To_Create);
             }
         }
     }
