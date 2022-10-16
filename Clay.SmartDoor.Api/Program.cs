@@ -1,5 +1,5 @@
 using Clay.SmartDoor.Api.Extentions;
-using Clay.SmartDoor.Infrastructure.Extentions;
+using Clay.SmartDoor.Infrastructure;
 using Serilog;
 using System.Text.Json.Serialization;
 
@@ -22,8 +22,10 @@ try
             .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
     builder.Services.AddSmartDoorServices();
+    builder.Services.AddSeriLog();
     builder.Services.AddInfrastructureServices(config);
     builder.Services.AddOpenApiDocumentation();
+    builder.Services.AddJwtAuthentication(config);
 
 
     var app = builder.Build();
@@ -31,12 +33,14 @@ try
     // Configure the HTTP request pipeline.
     if (app.Environment.IsDevelopment())
     {
+        app.UseDeveloperExceptionPage();
         app.EnsureDatabaseSetup();
     }
 
     app.UseHttpsRedirection();
 
     app.UseOpenApiDocumentation();
+    app.UseAuthentication();
     app.UseAuthorization();
 
     app.MapSmartDoorControllers();

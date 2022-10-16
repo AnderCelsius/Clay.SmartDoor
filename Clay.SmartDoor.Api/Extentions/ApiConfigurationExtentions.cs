@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
@@ -121,7 +122,7 @@ namespace Clay.SmartDoor.Api.Extentions
         public static void UseOpenApiDocumentation(this WebApplication app)
         {
             app.UseSwagger();
-            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartAC API V1"); });
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "SmartDoor API V1"); });
         }
 
         public static void MapSmartDoorControllers(this WebApplication app)
@@ -139,5 +140,9 @@ namespace Clay.SmartDoor.Api.Extentions
             SmartDoorDataSeeder.Seed(db);
         }
 
+        public static void AddSeriLog(this IServiceCollection services)
+        {
+            services.AddSingleton(Log.Logger);
+        }
     }
 }

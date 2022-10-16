@@ -5,7 +5,6 @@ using Clay.SmartDoor.Core.Interfaces.InfrastructureServices;
 using Clay.SmartDoor.Core.Models;
 using Clay.SmartDoor.Core.Models.Constants;
 using Serilog;
-using System.Transactions;
 
 namespace Clay.SmartDoor.Core.Services
 {

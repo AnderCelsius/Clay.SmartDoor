@@ -7,5 +7,9 @@ namespace Clay.SmartDoor.Api.Controllers
     [ApiController]
     public class DoorsController : ControllerBase
     {
+        public DoorsController()
+        {
+
+        }
     }
 }
