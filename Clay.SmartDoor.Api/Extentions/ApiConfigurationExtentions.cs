@@ -1,6 +1,7 @@
 ﻿using Clay.SmartDoor.Api.Identity;
 using Clay.SmartDoor.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -21,6 +22,12 @@ namespace Clay.SmartDoor.Api.Extentions
             new ConfigurationBuilder()
             .AddEnvironmentVariables()
             .Build();
+        }
+
+        public static void AddSmartDoorServices(this IServiceCollection services)
+        {
+            services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+            services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
         }
         public static void AddOpenApiDocumentation(this IServiceCollection services)
         {
@@ -69,7 +76,9 @@ namespace Clay.SmartDoor.Api.Extentions
                 c.IncludeXmlComments(xmlFilename);
             });
         }
-        public static void AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
+        public static void AddJwtAuthentication(
+            this IServiceCollection services, 
+            IConfiguration configuration)
         {
             var issuer = configuration["Jwt:Issuer"];
             var audience = configuration["Jwt:Audience"];
@@ -78,7 +87,12 @@ namespace Clay.SmartDoor.Api.Extentions
             services.AddAuthorization();
 
             services
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddAuthentication( options =>
+                {
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
                 .AddJwtBearer(options =>
                 {
                     options.RequireHttpsMetadata = false;
@@ -97,15 +111,9 @@ namespace Clay.SmartDoor.Api.Extentions
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("OrganizationAdmin", policy =>
-                    policy.RequireRole(SmartDoorJwtService.JwtScopeOrganizationAdmin)
-                );
-
-                options.AddPolicy("OrganizationUser", policy =>
-                {
-                    policy.RequireRole(SmartDoorJwtService.JwtScopeOrganizationUser);
-                    policy.AddRequirements(new SpecialDoorAccessRequirement());
-                });
+                //options.AddPolicy("OrganizationAdmin", policy =>
+                //    policy.RequireRole(SmartDoorJwtService.JwtScopeOrganizationAdmin)
+                //);
             });
 
             services.AddHttpContextAccessor();

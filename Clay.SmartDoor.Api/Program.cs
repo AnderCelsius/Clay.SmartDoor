@@ -21,6 +21,7 @@ try
     builder.Services.AddControllers()
             .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
+    builder.Services.AddSmartDoorServices();
     builder.Services.AddInfrastructureServices(config);
     builder.Services.AddOpenApiDocumentation();
 
