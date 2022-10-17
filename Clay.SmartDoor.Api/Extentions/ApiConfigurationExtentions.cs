@@ -164,15 +164,20 @@ namespace Clay.SmartDoor.Api.Extentions
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("Door.Create", policy =>
+                options.AddPolicy("Access.Create", policy =>
                  {
                      policy.RequireAuthenticatedUser();
-                     policy.RequireClaim("Permission", Permissions.Door.Create);
+                     policy.RequireClaim("Permission", Permissions.Access.Create);
                  });
-                options.AddPolicy("Door.General",
-                    policy => policy.RequireClaim("Permission", Permissions.Door.General));
-                options.AddPolicy("Door.Store",
-                    policy => policy.RequireClaim("Permission", Permissions.Door.Store));
+                options.AddPolicy("Access.Grant", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("Permission", Permissions.Access.Grant);
+                });
+                options.AddPolicy("Access.Delete",
+                    policy => policy.RequireClaim("Permission", Permissions.Access.Revoke));
+                options.AddPolicy("User.Create",
+                    policy => policy.RequireClaim("Permission", Permissions.User.Create));
             });
 
             services.AddHttpContextAccessor();

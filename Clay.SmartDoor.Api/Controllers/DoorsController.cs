@@ -31,12 +31,12 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="403">When caller does not belong to the required group to create door</response>
         [Route("add-door")]
         [HttpPost]
-        [Authorize(Policy = Permissions.Door.Create)]
+        [Authorize(Policy = Permissions.Access.Create)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Add(
-            [ModelBinder(BinderType = typeof(AppUserIdBinder))] string userId,
+            [ModelBinder(BinderType = typeof(AuthenticatedUserIdBinder))] string userId,
             [FromBody] CreateDoorRecord doorModel)
         {
             var result = await _doorService.CreateNewDoorAsync(doorModel, userId);
@@ -58,7 +58,7 @@ namespace Clay.SmartDoor.Api.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Exit(
-            [ModelBinder(BinderType = typeof(AppUserIdBinder))] string userId,
+            [ModelBinder(BinderType = typeof(AuthenticatedUserIdBinder))] string userId,
             string doorId)
         {
             var result = await _doorService.ExitDoorAsync(doorId, userId);
@@ -94,11 +94,10 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="403">When caller does not belong to the required group to access door</response>
         [Route("open-door")]
         [HttpPost]
-        [Authorize(Policy = Permissions.Door.General)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Open(
-            [ModelBinder(BinderType = typeof(AppUserIdBinder))] string userId,
+            [ModelBinder(BinderType = typeof(AuthenticatedUserIdBinder))] string userId,
             [FromBody] DoorAccessRequest doorModel)
         {
             var result = await _doorService.OpenDoorAsync(doorModel, userId);

@@ -24,8 +24,14 @@ namespace Clay.SmartDoor.Core.Services
         public async Task<ApiResponse<PermissionsDto>> GetAsync(string roleId)
         {
             var allPermissions = new List<RoleClaimDto>();
+            var accessPermissions = new List<RoleClaimDto>();
+            var userPermissions = new List<RoleClaimDto>();
 
-            allPermissions.GetPermission(typeof(Permissions.Door));
+            accessPermissions.GetPermission(typeof(Permissions.Access));
+            userPermissions.GetPermission(typeof(Permissions.User));
+
+            allPermissions.AddRange(accessPermissions);
+            allPermissions.AddRange(userPermissions);
 
             var role = await _roleManager.FindByIdAsync(roleId);
 

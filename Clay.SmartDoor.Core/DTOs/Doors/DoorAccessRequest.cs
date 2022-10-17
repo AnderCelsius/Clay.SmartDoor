@@ -8,6 +8,6 @@ namespace Clay.SmartDoor.Core.DTOs.Doors
         public string DoorId { get; set; } = string.Empty;
 
         [Required]
-        public string GroupId { get; set; } = string.Empty;
+        public string AccessGroupId { get; set; } = string.Empty;
     }
 }

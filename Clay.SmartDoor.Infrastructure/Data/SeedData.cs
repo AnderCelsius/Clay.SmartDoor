@@ -75,7 +75,7 @@ namespace Clay.SmartDoor.Infrastructure.Data
             this RoleManager<IdentityRole> roleManager)
         {
             var superAdminRole = await roleManager.FindByNameAsync(Roles.SuperAdmin.ToString());
-            await roleManager.AddPermissionClaim(superAdminRole, "Door");
+            await roleManager.AddPermissionClaim(superAdminRole, "User");
         }
 
         public async static Task SeedAccessGroups(
@@ -92,6 +92,9 @@ namespace Clay.SmartDoor.Infrastructure.Data
         {
             var allClaims = await roleManager.GetClaimsAsync(role);
             var allPermissions = Permissions.GeneratePermissions(module);
+            var accessPermissions = Permissions.GenerateAccessPermissions();
+
+            allPermissions.AddRange(allPermissions);
 
             foreach (var permission in allPermissions)
             {
