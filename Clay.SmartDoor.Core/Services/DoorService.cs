@@ -121,7 +121,7 @@ namespace Clay.SmartDoor.Core.Services
             }
         }
 
-        public async Task<ApiResponse<string>> OpenDoorAsync(OpenDoor model, string userId)
+        public async Task<ApiResponse<string>> OpenDoorAsync(DoorAccessRequest model, string userId)
         {
             try
             {
@@ -135,7 +135,7 @@ namespace Clay.SmartDoor.Core.Services
                 }
  
                 var assignedDoor = await _unitOfWork.DoorAssignments
-                    .GetAsync(da => da.DoorId == model.DoorId && da.GroupId == model.GroupId && da.Assigned == true);
+                    .GetAsync(da => da.DoorId == model.DoorId && da.AccessGroupId == model.GroupId && da.Assigned == true);
 
                 if (assignedDoor == null)
                 {

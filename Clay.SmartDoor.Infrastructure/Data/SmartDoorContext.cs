@@ -194,12 +194,12 @@ namespace Clay.SmartDoor.Infrastructure.Data
             modelBuilder.Entity<DoorAssignment>()
                 .HasOne(da => da.AccessGroup)
                 .WithMany(da => da.DoorAssignment)
-                .HasForeignKey(da => da.GroupId)
+                .HasForeignKey(da => da.AccessGroupId)
                 .IsRequired(true)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DoorAssignment>()
-                .HasIndex(da => da.GroupId);
+                .HasIndex(da => da.AccessGroupId);
 
             modelBuilder.Entity<DoorAssignment>()
                 .HasIndex(da => da.DoorId);

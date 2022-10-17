@@ -2,7 +2,7 @@
 
 namespace Clay.SmartDoor.Core.Interfaces.InfrastructureServices
 {
-    public interface IDoorAssignmentRepository : IGenericRepository<DoorAssignment>
+    public interface IDoorAssignmentService : IGenericRepository<DoorAssignment>
     {
     }
 }

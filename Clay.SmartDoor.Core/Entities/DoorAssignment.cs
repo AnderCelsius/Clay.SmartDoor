@@ -5,7 +5,7 @@ namespace Clay.SmartDoor.Core.Entities
     public class DoorAssignment : BaseEntity
     {
         public string DoorId { get; set; } = string.Empty;
-        public string GroupId { get; set;} = string.Empty;
+        public string AccessGroupId { get; set;} = string.Empty;
         public bool Assigned { get; set; }
 
         [Column("Access_Group")]

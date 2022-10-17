@@ -2,7 +2,7 @@
 
 namespace Clay.SmartDoor.Core.DTOs.Doors
 {
-    public class OpenDoor
+    public class DoorAccessRequest
     {
         [Required]
         public string DoorId { get; set; } = string.Empty;

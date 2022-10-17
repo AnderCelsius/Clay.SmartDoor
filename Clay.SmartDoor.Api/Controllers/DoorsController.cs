@@ -88,7 +88,7 @@ namespace Clay.SmartDoor.Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Open(
             [ModelBinder(BinderType = typeof(AppUserIdBinder))] string userId,
-            [FromBody] OpenDoor doorModel)
+            [FromBody] DoorAccessRequest doorModel)
         {
             var result = await _doorService.OpenDoorAsync(doorModel, userId);
             return StatusCode(result.StatusCode, result);

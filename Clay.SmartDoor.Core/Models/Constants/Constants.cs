@@ -8,6 +8,8 @@
         public const string Generic_Success_Message = "Operation Succeeded.";
         public const string Generic_Not_Found_Message = "Not Found.";
         public const string Generic_Save_Success_Message = "Changes persisted to database.";
+        public const string Generic_Fail_Already_Exist_Message = "Operation failed. Item already exist.";
+        public const string Generic_Fail_Does_Not_Exist_Message = "Operation failed. Item does not exist in group.";
         public const string Generic_Save_Fail_Message = "Failed to save.";
     }
     public class ActivityDescriptions
@@ -16,6 +18,10 @@
         public const string Door_Created = "Door Created";
         public const string Exit_Door = "Door Exited";
         public const string Activity_Logged = "Activity logged";
+        public const string User_Created = "New user added.";
+        public const string Group_Created = "New group added.";
+        public const string Door_Added_To_Group = "Door added to group.";
+        public const string Door_Removed_From_Group = "Door added to group.";
     }
 
     public class ApiResponseMesage
@@ -32,6 +38,7 @@
         public const string Login_Success = "Login successful";
         public const string UnAuthorized = "You are not authorized to access this door.";
         public const string Forbidden = "You are not allowed to access this door.";
+        public const string User_Already_Exist = "The user you are trying to add already exist.";
     }
 
     public class DoorMessage
