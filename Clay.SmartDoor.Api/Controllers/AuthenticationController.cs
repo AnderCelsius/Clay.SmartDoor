@@ -1,4 +1,4 @@
-﻿using Clay.SmartDoor.Core.DTOs;
+﻿using Clay.SmartDoor.Core.DTOs.Authentication;
 using Clay.SmartDoor.Core.Interfaces.CoreServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

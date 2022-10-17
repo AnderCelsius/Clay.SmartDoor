@@ -1,4 +1,4 @@
-﻿using Clay.SmartDoor.Core.Dtos;
+﻿using Clay.SmartDoor.Core.DTOs.Doors;
 using FluentValidation;
 
 namespace Clay.SmartDoor.Core.Models.Validators

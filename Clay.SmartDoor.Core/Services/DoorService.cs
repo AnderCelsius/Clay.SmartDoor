@@ -61,7 +61,7 @@ namespace Clay.SmartDoor.Core.Services
         {
             try
             {
-
+                return ApiResponse<string>.Fail(ApiResponseMesage.Failed_To_Create);
             }
             catch (Exception ex)
             {

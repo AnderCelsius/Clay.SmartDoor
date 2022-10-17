@@ -25,7 +25,7 @@ namespace Clay.SmartDoor.Infrastructure.Repositories
         /// the given <paramref name="doorId"/>, or null if no such door exist.</returns>
         public async Task<Door?> GetWithNoTrackingAsync(string doorId)
         {
-            return await _context.Door.AsNoTracking().SingleOrDefaultAsync(d => d.Id == doorId);
+            return await _context.Doors.AsNoTracking().SingleOrDefaultAsync(d => d.Id == doorId);
         }
     }
 }
