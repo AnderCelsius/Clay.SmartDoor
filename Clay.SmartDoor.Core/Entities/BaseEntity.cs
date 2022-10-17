@@ -6,7 +6,7 @@ namespace Clay.SmartDoor.Core.Entities
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; } = Guid.NewGuid().ToString();
-        public string CreatorBy { get; set; } = string.Empty;
+        public string CreatedBy { get; set; } = string.Empty;
  
         [Column("Date_Created")]
         public DateTime CreatedAt { get; set; }

@@ -17,6 +17,7 @@ namespace Clay.SmartDoor.Core
             services.AddScoped<IActivityLogService, ActivityLogService>();
             services.AddScoped<IAuthenticationService, AuthenticationService>();
             services.AddScoped<IPermissionService, PermissionService>();
+            services.AddScoped<IAdminService, AdminService>();
         }
     }
 }

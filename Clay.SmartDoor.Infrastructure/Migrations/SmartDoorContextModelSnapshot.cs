@@ -47,6 +47,9 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("AccessGroups");
                 });
 
@@ -103,6 +106,7 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("AccessGroupId")
+                        .IsRequired()
                         .HasColumnType("varchar(255)");
 
                     b.Property<string>("ConcurrencyStamp")
@@ -177,6 +181,8 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
 
                     b.HasIndex("AccessGroupId");
 
+                    b.HasIndex("Email");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -235,6 +241,13 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("varchar(255)");
 
+                    b.Property<string>("AccessGroupId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("Assigned")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("Date_Created");
@@ -248,19 +261,15 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
-                    b.Property<string>("GroupId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("datetime(6)")
                         .HasColumnName("Last_Modified_Date");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DoorId");
+                    b.HasIndex("AccessGroupId");
 
-                    b.HasIndex("GroupId");
+                    b.HasIndex("DoorId");
 
                     b.ToTable("DoorAssignment");
                 });
@@ -406,16 +415,20 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
 
             modelBuilder.Entity("Clay.SmartDoor.Core.Entities.AppUser", b =>
                 {
-                    b.HasOne("Clay.SmartDoor.Core.Entities.AccessGroup", null)
+                    b.HasOne("Clay.SmartDoor.Core.Entities.AccessGroup", "AccessGroup")
                         .WithMany("Users")
-                        .HasForeignKey("AccessGroupId");
+                        .HasForeignKey("AccessGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AccessGroup");
                 });
 
             modelBuilder.Entity("Clay.SmartDoor.Core.Entities.DoorAssignment", b =>
                 {
                     b.HasOne("Clay.SmartDoor.Core.Entities.AccessGroup", "AccessGroup")
                         .WithMany("DoorAssignment")
-                        .HasForeignKey("GroupId")
+                        .HasForeignKey("AccessGroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -16,9 +16,6 @@ namespace Clay.SmartDoor.Core.Models.Validators
             RuleFor(d => d.NameTag)
                 .NotNull().WithMessage("Field is required")
                 .NotEmpty().WithMessage("Field is required");
-            RuleFor(d => d.CreatorId)
-                .NotNull().WithMessage("Field is required")
-                .NotEmpty().WithMessage("Field is required");
         }
     }
 }

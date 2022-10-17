@@ -21,12 +21,12 @@ namespace Clay.SmartDoor.Core.Services
             _logger = logger;
         }
 
-        public async Task<ApiResponse<string>> CreateNewDoorAsync(CreateDoorRecord model)
+        public async Task<ApiResponse<string>> CreateNewDoorAsync(CreateDoorRecord model, string creatorId)
         {
             try
             {
                 _logger.Information("Beginning add operation...");
-                var door = model.ToDoor(DateTime.Now, DateTime.Now);
+                var door = model.ToDoor(DateTime.Now, DateTime.Now, creatorId);
 
                 // Create door
                 await _unitOfWork.Doors.AddAsync(door);
@@ -36,11 +36,11 @@ namespace Clay.SmartDoor.Core.Services
                 {
                     Time = DateTime.Now,
                     Description = ActivityDescriptions.Door_Created,
-                    ActionBy = model.CreatorId,
+                    ActionBy = creatorId,
                     DoorId = door.Id,
                     Building = model.Building,
                     Floor = model.Floor,
-                    DoorTag = door.NameTag
+                    DoorTag = door.NameTag,
                 };
 
                 await _unitOfWork.ActivityLogs.AddAsync(activityLog);

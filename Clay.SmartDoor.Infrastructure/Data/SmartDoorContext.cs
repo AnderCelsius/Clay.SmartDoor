@@ -106,7 +106,7 @@ namespace Clay.SmartDoor.Infrastructure.Data
                 .IsRequired();
 
             modelBuilder.Entity<Door>()
-                .Property(d => d.CreatorBy)
+                .Property(d => d.CreatedBy)
                 .HasColumnName("Creator_Id")
                 .IsRequired();
             #endregion
@@ -134,11 +134,30 @@ namespace Clay.SmartDoor.Infrastructure.Data
                 .Property(au => au.CreatedBy)
                 .HasMaxLength(100)
                 .IsRequired();
+
+            modelBuilder.Entity<AppUser>()
+                .HasOne(au => au.AccessGroup)
+                .WithMany(gr => gr.Users)
+                .HasForeignKey(au => au.AccessGroupId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AppUser>()
+                .HasIndex(au => au.AccessGroupId)
+                .IsUnique(false);
+
+            modelBuilder.Entity<AppUser>()
+                .HasIndex(au => au.Email)
+                .IsUnique(false);
             #endregion
 
             #region AccessGroups Configuration
             modelBuilder.Entity<AccessGroup>()
                 .HasKey(ag => ag.Id);
+
+            modelBuilder.Entity<AccessGroup>()
+                .HasIndex(ag => ag.Name)
+                .IsUnique();
 
             modelBuilder.Entity<AccessGroup>()
                 .Property(ag => ag.Id)
@@ -162,7 +181,7 @@ namespace Clay.SmartDoor.Infrastructure.Data
                 .IsRequired();
 
             modelBuilder.Entity<AccessGroup>()
-                .Property(ag => ag.CreatorBy)
+                .Property(ag => ag.CreatedBy)
                 .IsRequired();
             #endregion
 
@@ -188,7 +207,7 @@ namespace Clay.SmartDoor.Infrastructure.Data
                 .IsRequired();
 
             modelBuilder.Entity<DoorAssignment>()
-                .Property(da => da.CreatorBy)
+                .Property(da => da.CreatedBy)
                 .IsRequired();
 
             modelBuilder.Entity<DoorAssignment>()

@@ -102,7 +102,7 @@ namespace Clay.SmartDoor.Core.Services
                     CreatedAt = DateTime.Now,
                     LastModified = DateTime.Now,
                     IsActive = true,
-                    CreatorBy = userId
+                    CreatedBy = userId
                 };
 
                 var activilog = new ActivityLog
@@ -183,7 +183,7 @@ namespace Clay.SmartDoor.Core.Services
                 {
                     DoorId = requestModel.DoorId,
                     AccessGroupId = requestModel.GroupId,
-                    CreatorBy = userId,
+                    CreatedBy = userId,
                     CreatedAt = DateTime.Now,
                     LastModified = DateTime.Now,
                     Assigned = true

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Clay.SmartDoor.Infrastructure.Migrations
 {
     [DbContext(typeof(SmartDoorContext))]
-    [Migration("20221015185836_InitializeDb")]
-    partial class InitializeDb
+    [Migration("20221017085522_Initialize Database")]
+    partial class InitializeDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,6 +20,40 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "6.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("Clay.SmartDoor.Core.Entities.AccessGroup", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("Date_Created");
+
+                    b.Property<string>("CreatorBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("Last_Modified_Date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("AccessGroups");
+                });
 
             modelBuilder.Entity("Clay.SmartDoor.Core.Entities.ActivityLog", b =>
                 {
@@ -62,7 +96,7 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
 
                     b.HasIndex("ActionBy");
 
-                    b.ToTable("ActivityLog");
+                    b.ToTable("ActivityLogs");
                 });
 
             modelBuilder.Entity("Clay.SmartDoor.Core.Entities.AppUser", b =>
@@ -72,6 +106,10 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("AccessGroupId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -134,10 +172,6 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("longtext");
 
-                    b.Property<long>("StaffId")
-                        .HasMaxLength(100)
-                        .HasColumnType("bigint");
-
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("tinyint(1)");
 
@@ -146,6 +180,10 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                         .HasColumnType("varchar(256)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AccessGroupId");
+
+                    b.HasIndex("Email");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -196,7 +234,46 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
 
                     b.HasIndex("NameTag");
 
-                    b.ToTable("Door");
+                    b.ToTable("Doors");
+                });
+
+            modelBuilder.Entity("Clay.SmartDoor.Core.Entities.DoorAssignment", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("AccessGroupId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("Assigned")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("Date_Created");
+
+                    b.Property<string>("CreatorBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("DoorId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("Last_Modified_Date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessGroupId");
+
+                    b.HasIndex("DoorId");
+
+                    b.ToTable("DoorAssignment");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -338,6 +415,28 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Clay.SmartDoor.Core.Entities.AppUser", b =>
+                {
+                    b.HasOne("Clay.SmartDoor.Core.Entities.AccessGroup", "AccessGroup")
+                        .WithMany("Users")
+                        .HasForeignKey("AccessGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AccessGroup");
+                });
+
+            modelBuilder.Entity("Clay.SmartDoor.Core.Entities.DoorAssignment", b =>
+                {
+                    b.HasOne("Clay.SmartDoor.Core.Entities.AccessGroup", "AccessGroup")
+                        .WithMany("DoorAssignment")
+                        .HasForeignKey("AccessGroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AccessGroup");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -387,6 +486,13 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Clay.SmartDoor.Core.Entities.AccessGroup", b =>
+                {
+                    b.Navigation("DoorAssignment");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Clay.SmartDoor.Core.Entities.AppUser", b =>

@@ -3,12 +3,15 @@ using Clay.SmartDoor.Core.Helpers;
 using Clay.SmartDoor.Core.Models;
 using Clay.SmartDoor.Core.Models.Enums;
 using Microsoft.AspNetCore.Identity;
+using Serilog;
 
 namespace Clay.SmartDoor.Infrastructure.Data
 {
     public static class SeedData
     {
         private const string Default_Password = "Password@123";
+        private const string Default_AccessGroup = "33e09d95-60c1-41ed-a2ae-faff5e711078";
+        private const string Default_SecureGroup_One = "ba63545f-2c49-4954-983c-bef094a4027a";
         public static async Task SeedDefaultRolesAsync(RoleManager<IdentityRole> roleManager)
         {
             await roleManager.CreateAsync(new IdentityRole(Roles.SuperAdmin.ToString()));
@@ -51,13 +54,20 @@ namespace Clay.SmartDoor.Infrastructure.Data
             UserManager<AppUser> userManager)
         {
 
-            var user = await userManager.FindByEmailAsync(BasicUser.Email);
-
-            if (user == null)
+            try
             {
-                await userManager.CreateAsync(BasicUser, Default_Password);
+                var user = await userManager.FindByEmailAsync(BasicUser.Email);
 
-                await userManager.AddToRoleAsync(BasicUser, Roles.Basic.ToString());
+                if (user == null)
+                {
+                    await userManager.CreateAsync(BasicUser, Default_Password);
+
+                    await userManager.AddToRoleAsync(BasicUser, Roles.Basic.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, ex.Message);
             }
         }
 
@@ -66,6 +76,14 @@ namespace Clay.SmartDoor.Infrastructure.Data
         {
             var superAdminRole = await roleManager.FindByNameAsync(Roles.SuperAdmin.ToString());
             await roleManager.AddPermissionClaim(superAdminRole, "Door");
+        }
+
+        public async static Task SeedAccessGroups(
+           this SmartDoorContext context)
+        {
+            await context.AccessGroups.AddAsync(SecureAccessGroup);
+            await context.AccessGroups.AddAsync(OpenAccessGroup);
+            await context.SaveChangesAsync();
         }
 
         private async static Task AddPermissionClaim(
@@ -86,6 +104,28 @@ namespace Clay.SmartDoor.Infrastructure.Data
 
         }
 
+        #region AccessGroup Objects
+        private static AccessGroup SecureAccessGroup = new()
+        {
+            Id = Default_SecureGroup_One,
+            Name = "Secure Group",
+            IsActive = true,
+            CreatedAt = DateTime.Now,
+            CreatedBy = "22eef6fa-2843-4516-a410-f7518703499a",
+            LastModified = DateTime.Now,
+        };
+
+        private static AccessGroup OpenAccessGroup = new()
+        {
+            Id = Default_AccessGroup,
+            Name = "Oepn Group",
+            IsActive = true,
+            CreatedAt = DateTime.Now,
+            CreatedBy = "22eef6fa-2843-4516-a410-f7518703499a",
+            LastModified = DateTime.Now,
+        };
+        #endregion
+
         #region User Objects
 
         private static AppUser SuperAdminUser = new()
@@ -97,6 +137,7 @@ namespace Clay.SmartDoor.Infrastructure.Data
             EmailConfirmed = true,
             PhoneNumberConfirmed = true,
             IsActive = true,
+            AccessGroupId = Default_SecureGroup_One
         };
 
         private static AppUser AdminUser = new()
@@ -107,7 +148,8 @@ namespace Clay.SmartDoor.Infrastructure.Data
             UserName = "adminuser@email.com",
             EmailConfirmed = true,
             PhoneNumberConfirmed = true,
-            IsActive=true
+            IsActive=true,
+            AccessGroupId = Default_SecureGroup_One
         };
 
         private static AppUser BasicUser = new()
@@ -118,7 +160,8 @@ namespace Clay.SmartDoor.Infrastructure.Data
             UserName = "basicuser@email.com",
             EmailConfirmed = true,
             PhoneNumberConfirmed = true,
-            IsActive = true
+            IsActive = true,
+            AccessGroupId = Default_AccessGroup
         };
         #endregion
     }

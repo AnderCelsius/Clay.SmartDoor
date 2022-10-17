@@ -18,7 +18,7 @@ namespace Clay.SmartDoor.Core.Interfaces.CoreServices
         /// <returns>
         /// A response containing the state of the operation.
         /// </returns>
-        Task<ApiResponse<string>> CreateNewDoorAsync(CreateDoorRecord door);
+        Task<ApiResponse<string>> CreateNewDoorAsync(CreateDoorRecord door, string creatorId);
       
         Task<ApiResponse<string>> ExitDoorAsync(ExitDoor door);
         Task<ApiResponse<IEnumerable<DoorDetails>>> GetDoorsAsync();

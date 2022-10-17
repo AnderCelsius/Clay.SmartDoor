@@ -14,7 +14,7 @@ namespace Clay.SmartDoor.Core.Entities
 
         #region Navigational Properties
         public ICollection<ActivityLog> ActivityLogs { get; set; } = new List<ActivityLog>();
-        public AccessGroup Group { get; set; } = default!;
+        public AccessGroup AccessGroup { get; set; } = default!;
         #endregion
     }
 }

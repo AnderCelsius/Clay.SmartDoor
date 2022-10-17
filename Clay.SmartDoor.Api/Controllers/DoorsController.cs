@@ -24,15 +24,18 @@ namespace Clay.SmartDoor.Api.Controllers
         /// Adds a new door 
         /// </summary>
         /// <param name="doorModel"></param>
+        /// <param name="userId"></param>
         /// <returns></returns>
         [Route("add-door")]
         [HttpPost]
         [Authorize(Policy = Permissions.Door.Create)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> Add([FromBody] CreateDoorRecord doorModel)
+        public async Task<IActionResult> Add(
+            [ModelBinder(BinderType = typeof(AppUserIdBinder))] string userId,
+            [FromBody] CreateDoorRecord doorModel)
         {
-            var result = await _doorService.CreateNewDoorAsync(doorModel);
+            var result = await _doorService.CreateNewDoorAsync(doorModel, userId);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -62,8 +65,8 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <returns></returns>
         /// <response code="200">When the API call completes</response>
         /// <response code="401">when caller is not calling this enpoind with the right bearer token</response>
-        [Route("exit-door")]
-        [HttpPost]
+        [Route("get-door")]
+        [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Get()
