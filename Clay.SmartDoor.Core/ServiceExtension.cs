@@ -15,6 +15,8 @@ namespace Clay.SmartDoor.Core
             // Add Dependencies
             services.AddScoped<IDoorService, DoorService>();
             services.AddScoped<IActivityLogService, ActivityLogService>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<IPermissionService, PermissionService>();
         }
     }
 }

@@ -92,8 +92,8 @@ namespace Clay.SmartDoor.Infrastructure.Data
         {
             FirstName = "Obinna",
             LastName = "Asiegbulam",
-            Email = "SuperAdminUser@Email.com",
-            UserName = "SuperAdminUser@Email.com",
+            Email = "superadminuser@email.com",
+            UserName = "superadminuser@email.com",
             EmailConfirmed = true,
             PhoneNumberConfirmed = true,
             IsActive = true,
@@ -103,8 +103,8 @@ namespace Clay.SmartDoor.Infrastructure.Data
         {
             FirstName = "Joshua",
             LastName = "Enyi",
-            Email = "AdminUser@Email.com",
-            UserName = "AdminUser@Email.com",
+            Email = "adminuser@email.com",
+            UserName = "adminuser@email.com",
             EmailConfirmed = true,
             PhoneNumberConfirmed = true,
             IsActive=true
@@ -114,8 +114,8 @@ namespace Clay.SmartDoor.Infrastructure.Data
         {
             FirstName = "Omowunmi",
             LastName = "Kassim",
-            Email = "BasicUser@Email.com",
-            UserName = "BasicUser@Email.com",
+            Email = "basicuser@email.com",
+            UserName = "basicuser@email.com",
             EmailConfirmed = true,
             PhoneNumberConfirmed = true,
             IsActive = true

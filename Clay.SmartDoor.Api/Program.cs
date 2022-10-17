@@ -23,12 +23,14 @@ try
             .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
     builder.Services.AddSeriLog();
+    builder.Services.AddSmartDoorCors();
     builder.Services.AddSmartDoorPermissionPolicy();
     builder.Services.AddInfrastructureServices(config);
-    builder.Services.AddCoreServices();
     builder.Services.AddOpenApiDocumentation();
-    builder.Services.AddJwtAuthentication(config);
+
     builder.Services.AddSmartDoorIdentity();
+    builder.Services.AddJwtAuthentication(config);
+    builder.Services.AddCoreServices();
 
 
     var app = builder.Build();
@@ -43,6 +45,7 @@ try
     app.UseHttpsRedirection();
 
     app.UseOpenApiDocumentation();
+    app.UseCors("SamrtDoorpolicy");
     app.UseAuthentication();
     app.UseAuthorization();
 
