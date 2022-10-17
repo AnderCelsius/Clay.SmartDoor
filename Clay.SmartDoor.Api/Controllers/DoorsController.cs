@@ -1,4 +1,4 @@
-﻿using Clay.SmartDoor.Core.Dtos;
+﻿using Clay.SmartDoor.Core.Dtos.Doors;
 using Clay.SmartDoor.Core.Interfaces.CoreServices;
 using Clay.SmartDoor.Core.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -20,12 +20,10 @@ namespace Clay.SmartDoor.Api.Controllers
         }
 
         /// <summary>
-        /// Add a new door.
-        /// CreatorUserId is the ID of the user calling this endpoint.
+        /// Adds a new door 
         /// </summary>
-        ///<response code="200">When the API call completes</response>
-        /// <response code="401">when caller is not calling this enpoind with the right bearer token</response>
-        ///
+        /// <param name="doorModel"></param>
+        /// <returns></returns>
         [Route("AddDoor")]
         [HttpPost]
         [Authorize(Policy = Permissions.Door.Create)]
@@ -33,7 +31,8 @@ namespace Clay.SmartDoor.Api.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> AddDoor([FromBody] CreateDoorRecord doorModel)
         {
-            return Ok();
+            var result = await _doorService.CreateNewDoorAsync(doorModel);
+            return StatusCode(result.StatusCode, result);
         }
     }
 }

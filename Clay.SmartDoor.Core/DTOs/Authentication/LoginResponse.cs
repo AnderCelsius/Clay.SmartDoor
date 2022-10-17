@@ -1,4 +1,4 @@
-﻿namespace Clay.SmartDoor.Core.DTOs
+﻿namespace Clay.SmartDoor.Core.DTOs.Authentication
 {
     public class LoginResponse
     {

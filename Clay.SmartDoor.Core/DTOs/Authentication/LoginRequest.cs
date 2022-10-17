@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Clay.SmartDoor.Core.DTOs
+namespace Clay.SmartDoor.Core.DTOs.Authentication
 {
     public class LoginRequest
     {

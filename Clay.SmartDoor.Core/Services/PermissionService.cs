@@ -1,4 +1,4 @@
-﻿using Clay.SmartDoor.Core.DTOs;
+﻿using Clay.SmartDoor.Core.DTOs.Authentication;
 using Clay.SmartDoor.Core.Entities;
 using Clay.SmartDoor.Core.Helpers;
 using Clay.SmartDoor.Core.Interfaces.CoreServices;

@@ -1,4 +1,4 @@
-﻿using Clay.SmartDoor.Core.DTOs;
+﻿using Clay.SmartDoor.Core.DTOs.Authentication;
 using Clay.SmartDoor.Core.Models;
 using System;
 using System.Collections.Generic;

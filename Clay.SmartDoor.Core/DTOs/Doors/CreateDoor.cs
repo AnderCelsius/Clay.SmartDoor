@@ -1,6 +1,6 @@
 ﻿using Clay.SmartDoor.Core.Entities;
 
-namespace Clay.SmartDoor.Core.Dtos
+namespace Clay.SmartDoor.Core.Dtos.Doors
 {
     public record CreateDoorRecord(
         string NameTag,
