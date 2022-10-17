@@ -2,12 +2,11 @@
 
 namespace Clay.SmartDoor.Core.DTOs.Doors
 {
-    public class OpenDoor
+    public class ExitDoor
     {
         [Required]
         public string DoorId { get; set; } = string.Empty;
-
         [Required]
-        public string GroupId { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
     }
 }

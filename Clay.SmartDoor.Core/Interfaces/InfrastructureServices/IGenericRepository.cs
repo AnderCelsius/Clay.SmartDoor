@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace Clay.SmartDoor.Core.Interfaces.InfrastructureServices
 {
@@ -18,6 +13,15 @@ namespace Clay.SmartDoor.Core.Interfaces.InfrastructureServices
         /// <param name="entity"></param>
         /// <returns>Add task that represents the asynchronous Add operation.</returns>
         Task AddAsync(T entity);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <param name="includes"></param>
+        /// <returns></returns>
+        Task<T?> GetAsync(Expression<Func<T, bool>> expression, List<string> includes = null!);
+        
         IQueryable<T> GetAll(
             Expression<Func<T, bool>> expression = null!, 
             Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null!, 

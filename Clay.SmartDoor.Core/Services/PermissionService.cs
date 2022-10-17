@@ -20,6 +20,7 @@ namespace Clay.SmartDoor.Core.Services
             _roleManager = roleManager;
             _userManager = userManager;
         }
+       
         public async Task<ApiResponse<PermissionsDto>> GetAsync(string roleId)
         {
             var allPermissions = new List<RoleClaimDto>();

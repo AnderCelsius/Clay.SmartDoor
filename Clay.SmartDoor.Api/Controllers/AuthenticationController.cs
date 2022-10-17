@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Clay.SmartDoor.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/authentication")]
     [ApiController]
     public class AuthenticationController : ControllerBase
     {

@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Clay.SmartDoor.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/admin")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class AdminController : ControllerBase
     {
     }
 }

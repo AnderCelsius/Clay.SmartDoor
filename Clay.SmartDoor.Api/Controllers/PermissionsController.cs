@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Clay.SmartDoor.Api.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/v1/permissions")]
     [ApiController]
     public class PermissionsController : ControllerBase
     {
