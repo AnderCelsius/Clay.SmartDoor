@@ -1,4 +1,4 @@
-﻿using Clay.SmartDoor.Core.Dtos.Doors;
+﻿using Clay.SmartDoor.Core.DTOs.Doors;
 using Clay.SmartDoor.Core.Entities;
 using Clay.SmartDoor.Core.Interfaces.CoreServices;
 using Clay.SmartDoor.Core.Interfaces.InfrastructureServices;
@@ -57,9 +57,17 @@ namespace Clay.SmartDoor.Core.Services
             }
         }
 
-        public Task<ApiResponse<string>> OpenDoorAsync(CreateDoorRecord door)
+        public async Task<ApiResponse<string>> OpenDoorAsync(OpenDoor door)
         {
-            throw new NotImplementedException();
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, ex.Message);
+                return ApiResponse<string>.Fail(ApiResponseMesage.Failed_To_Create);
+            }
         }
     }
 }

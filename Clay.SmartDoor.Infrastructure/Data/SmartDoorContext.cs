@@ -9,8 +9,10 @@ namespace Clay.SmartDoor.Infrastructure.Data
         public SmartDoorContext(DbContextOptions<SmartDoorContext> options)
             : base(options) { }
 
-        public DbSet<Door> Door { get; set; }
-        public DbSet<ActivityLog> ActivityLog { get; set; }
+        public DbSet<Door> Doors { get; set; }
+        public DbSet<ActivityLog> ActivityLogs { get; set; }
+        public DbSet<AccessGroup> AccessGroups { get; set; }
+        public DbSet<DoorAssignment> DoorAssignment { get; set; }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
         {
@@ -133,6 +135,76 @@ namespace Clay.SmartDoor.Infrastructure.Data
                 .HasMaxLength(100)
                 .IsRequired();
             #endregion
+
+            #region AccessGroups Configuration
+            modelBuilder.Entity<AccessGroup>()
+                .HasKey(ag => ag.Id);
+
+            modelBuilder.Entity<AccessGroup>()
+                .Property(ag => ag.Id)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<AccessGroup>()
+                .Property(ag => ag.Name)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            modelBuilder.Entity<AccessGroup>()
+                .Property(ag => ag.IsActive)
+                .IsRequired();
+
+            modelBuilder.Entity<AccessGroup>()
+                .Property(ag => ag.CreatedAt)
+                .IsRequired();
+
+            modelBuilder.Entity<AccessGroup>()
+                .Property(ag => ag.LastModified)
+                .IsRequired();
+
+            modelBuilder.Entity<AccessGroup>()
+                .Property(ag => ag.CreatorBy)
+                .IsRequired();
+            #endregion
+
+            #region DoorAssignment Configuration
+            modelBuilder.Entity<DoorAssignment>()
+                .HasKey(da => da.Id);
+            
+            modelBuilder.Entity<DoorAssignment>()
+                .Property(da => da.Id)
+                .ValueGeneratedOnAdd();
+
+            modelBuilder.Entity<DoorAssignment>()
+                .Property(da => da.DoorId)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            modelBuilder.Entity<DoorAssignment>()
+                .Property(da => da.CreatedAt)
+                .IsRequired();
+
+            modelBuilder.Entity<DoorAssignment>()
+                .Property(da => da.LastModified)
+                .IsRequired();
+
+            modelBuilder.Entity<DoorAssignment>()
+                .Property(da => da.CreatorBy)
+                .IsRequired();
+
+            modelBuilder.Entity<DoorAssignment>()
+                .HasOne(da => da.AccessGroup)
+                .WithMany(da => da.DoorAssignment)
+                .HasForeignKey(da => da.GroupId)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DoorAssignment>()
+                .HasIndex(da => da.GroupId);
+
+            modelBuilder.Entity<DoorAssignment>()
+                .HasIndex(da => da.DoorId);
+            #endregion
+
         }
     }
 }
