@@ -32,7 +32,7 @@ namespace Clay.SmartDoor.Core.Services
             _logger = logger;
         }
 
-        public async Task<ApiResponse<string>> AddUserAsync(NewUserRequest requestModel)
+        public async Task<ApiResponse<string>> AddUserAsync(NewUserRequest requestModel, string actionBy)
         {
             try
             {
@@ -52,14 +52,14 @@ namespace Clay.SmartDoor.Core.Services
                     AccessGroupId = requestModel.GroupId,
                     CreatedDate = DateTime.Now,
                     LastModified = DateTime.Now,
-                    CreatedBy = requestModel.CreatedBy,
+                    CreatedBy = actionBy,
                 };
 
                 var activityLog = new ActivityLog
                 {
                     Time = DateTime.Now,
                     Description = ActivityDescriptions.User_Created,
-                    ActionBy = requestModel.CreatedBy
+                    ActionBy = actionBy
                 };
 
                 using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
@@ -77,7 +77,8 @@ namespace Clay.SmartDoor.Core.Services
 
                 return ApiResponse<string>.Success(
                     ApiResponseMesage.Created_Successfully, 
-                    ApiResponseMesage.Created_Successfully);
+                    ApiResponseMesage.Created_Successfully,
+                    201);
             }
             catch (Exception ex)
             {
@@ -86,7 +87,7 @@ namespace Clay.SmartDoor.Core.Services
             }
         }
 
-        public async Task<ApiResponse<string>> AddGroupAsync(string groupName, string userId)
+        public async Task<ApiResponse<string>> AddAccessGroupAsync(string groupName, string actionBy)
         {
             try
             {
@@ -102,14 +103,14 @@ namespace Clay.SmartDoor.Core.Services
                     CreatedAt = DateTime.Now,
                     LastModified = DateTime.Now,
                     IsActive = true,
-                    CreatedBy = userId
+                    CreatedBy = actionBy
                 };
 
                 var activilog = new ActivityLog
                 {
                     Time = DateTime.Now,
                     Description = ActivityDescriptions.Group_Created,
-                    ActionBy = userId,
+                    ActionBy = actionBy,
                 };
 
                 await _unitOfWork.AccessGroups.AddAsync(accessGroup);
@@ -121,7 +122,7 @@ namespace Clay.SmartDoor.Core.Services
                 _logger.Information(saveResult > 0 ? Constants.Generic_Save_Success_Message
                     : Constants.Generic_Failure_Message);
 
-                return ApiResponse<string>.Success(ApiResponseMesage.Created_Successfully,ApiResponseMesage.Ok_Result);
+                return ApiResponse<string>.Success(ApiResponseMesage.Created_Successfully,ApiResponseMesage.Ok_Result, 201);
             }
             catch (Exception ex)
             {
@@ -161,7 +162,7 @@ namespace Clay.SmartDoor.Core.Services
             }
         }
 
-        public async Task<ApiResponse<string>> AddDoorToAcessGroupAsync(DoorAccessRequest requestModel, string userId)
+        public async Task<ApiResponse<string>> AddDoorToAcessGroupAsync(DoorAccessRequest requestModel, string actionBy)
         {
             try
             {
@@ -183,7 +184,7 @@ namespace Clay.SmartDoor.Core.Services
                 {
                     DoorId = requestModel.DoorId,
                     AccessGroupId = requestModel.GroupId,
-                    CreatedBy = userId,
+                    CreatedBy = actionBy,
                     CreatedAt = DateTime.Now,
                     LastModified = DateTime.Now,
                     Assigned = true
@@ -193,7 +194,7 @@ namespace Clay.SmartDoor.Core.Services
                 {
                     Time = DateTime.Now,
                     Description = ActivityDescriptions.Door_Added_To_Group,
-                    ActionBy = userId,
+                    ActionBy = actionBy,
                     DoorId = door.Id,
                     DoorTag = door.NameTag,
                     Floor = door.Floor,
@@ -208,7 +209,7 @@ namespace Clay.SmartDoor.Core.Services
                 _logger.Information(saveResult > 0 ? Constants.Generic_Save_Success_Message
                    : Constants.Generic_Failure_Message);
 
-                return ApiResponse<string>.Success(ApiResponseMesage.Created_Successfully, ApiResponseMesage.Ok_Result);
+                return ApiResponse<string>.Success(ApiResponseMesage.Created_Successfully, ApiResponseMesage.Ok_Result, 201);
             }
             catch (Exception ex)
             {
@@ -236,17 +237,7 @@ namespace Clay.SmartDoor.Core.Services
             }
         }
 
-        /// <summary>
-        /// Stringify and returns all the identity errors
-        /// </summary>
-        /// <param name="result"></param>
-        /// <returns>Identity Errors</returns>
-        private static string GetErrors(IdentityResult result)
-        {
-            return result.Errors.Aggregate(string.Empty, (current, err) => current + err.Description + "\n");
-        }
-
-        public async Task<ApiResponse<string>> RemoveDoorFromAccessGroupAsync(DoorAccessRequest requestModel, string userId)
+        public async Task<ApiResponse<string>> RemoveDoorFromAccessGroupAsync(DoorAccessRequest requestModel, string actionBy)
         {
             try
             {
@@ -270,7 +261,7 @@ namespace Clay.SmartDoor.Core.Services
                 {
                     Time = DateTime.Now,
                     Description = ActivityDescriptions.Door_Removed_From_Group,
-                    ActionBy = userId,
+                    ActionBy = actionBy,
                     DoorId = assignedDoor.DoorId,
                     DoorTag = door.NameTag,
                     Floor = door.Floor,
@@ -292,6 +283,16 @@ namespace Clay.SmartDoor.Core.Services
                 _logger.Error(ex, ex.Message);
                 return ApiResponse<string>.Fail(Constants.Generic_Operation_Failed_Message);
             }
+        }
+
+        /// <summary>
+        /// Stringify and returns all the identity errors
+        /// </summary>
+        /// <param name="result"></param>
+        /// <returns>Identity Errors</returns>
+        private static string GetErrors(IdentityResult result)
+        {
+            return result.Errors.Aggregate(string.Empty, (current, err) => current + err.Description + "\n");
         }
     }
 }

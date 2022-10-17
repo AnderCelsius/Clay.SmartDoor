@@ -2,6 +2,10 @@
 
 namespace Clay.SmartDoor.Api.Bindings
 {
+    /// <summary>
+    /// Retrieves the Indentity Name of the user making therequest 
+    /// and bindds it to the request userId
+    /// </summary>
     public class AppUserIdBinder : IModelBinder
     {
         public Task BindModelAsync(ModelBindingContext bindingContext)

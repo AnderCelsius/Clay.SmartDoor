@@ -51,7 +51,7 @@ namespace Clay.SmartDoor.Core.Services
                 _logger.Information(saveResult > 0 ? Constants.Generic_Save_Success_Message
                     : Constants.Generic_Failure_Message);
 
-                return ApiResponse<string>.Success(ApiResponseMesage.Created_Successfully, door.Id);
+                return ApiResponse<string>.Success(ApiResponseMesage.Created_Successfully, door.Id, 201);
 
             }
             catch (Exception ex)

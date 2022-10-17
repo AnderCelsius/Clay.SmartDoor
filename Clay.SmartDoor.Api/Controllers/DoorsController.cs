@@ -21,15 +21,19 @@ namespace Clay.SmartDoor.Api.Controllers
         }
 
         /// <summary>
-        /// Adds a new door 
+        /// Adds a new door to the database.
         /// </summary>
         /// <param name="doorModel"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
+        /// <response code="201">If the door is created</response>
+        /// <response code="401">when caller is not calling this enpoint with the right bearer token</response>
+        /// <response code="403">When caller does not belong to the required group to create door</response>
         [Route("add-door")]
         [HttpPost]
         [Authorize(Policy = Permissions.Door.Create)]
         [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Add(
             [ModelBinder(BinderType = typeof(AppUserIdBinder))] string userId,
@@ -43,33 +47,37 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <summary>
         /// Grants user access to exit a door if they pass all security requirements
         /// </summary>
-        /// <param name="doorModel"></param>
+        /// <param name="userId"></param>
+        /// <param name="doorId"></param>
         /// <returns></returns>
-        /// <response code="202">If the user successfully gets access</response>
+        /// <response code="200">If the user successfully gets access</response>
         /// <response code="401">when caller is not calling this enpoint with the right bearer token</response>
         /// <response code="403">When caller does not belong to the required group to access door</response>
         [Route("exit-door")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> Exit([FromBody] ExitDoor doorModel)
+        public async Task<IActionResult> Exit(
+            [ModelBinder(BinderType = typeof(AppUserIdBinder))] string userId,
+            string doorId)
         {
-            var result = await _doorService.ExitDoorAsync(doorModel);
+            var result = await _doorService.ExitDoorAsync(doorId, userId);
             return StatusCode(result.StatusCode, result);
         }
 
 
         /// <summary>
-        /// 
+        /// Retrieves the details of all doors.
         /// </summary>
         /// <returns></returns>
         /// <response code="200">When the API call completes</response>
-        /// <response code="401">when caller is not calling this enpoind with the right bearer token</response>
+        /// <response code="401">when caller is not calling this enpoind with the right bearer token</response> 
+        /// <response code="403">When caller does not belong to the required group to access eresource</response>
         [Route("get-door")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<ApiResponse<IEnumerable<DoorDetails>>>> Get()
         {
             var result = await _doorService.GetDoorsAsync();
             return StatusCode(result.StatusCode, result);

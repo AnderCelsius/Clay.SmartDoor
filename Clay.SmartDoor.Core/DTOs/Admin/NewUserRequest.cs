@@ -17,9 +17,6 @@ namespace Clay.SmartDoor.Core.DTOs.Admin
         public string Password { get; set; } = string.Empty;
 
         [Required]
-        public string CreatedBy { get; set; } = string.Empty;
-
-        [Required]
         public string GroupId { get; set; } = string.Empty;
     }
 }
