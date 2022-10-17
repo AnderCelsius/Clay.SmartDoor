@@ -57,7 +57,7 @@ namespace Clay.SmartDoor.Api.Controllers
         /// 
         /// This will additionally log the activity.
         /// </summary>
-        /// <param name="userId">The Id ofthe user making the request.</param>
+        /// <param name="userId">The Id of the user calling the api.</param>
         /// <param name="requestModel">Contains the DoorId and AccessGroupId</param>
         /// <returns></returns>
         /// <response code="200">When the door is successfully added to the access group.</response>
@@ -118,13 +118,14 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="401">If jwt token provided is invalid.</response>
         [HttpGet]
         [Route("access-groups")]
-        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> GetAccessGroups(GroupState groupState)
         {
             var result = await _adminService.GetAllAccessGroupsAsync(groupState);
             return StatusCode(result.StatusCode, result);
         }
+
 
         /// <summary>
         /// Fetches activity logs associated with the userId within a specified date range
@@ -143,6 +144,7 @@ namespace Clay.SmartDoor.Api.Controllers
             var result = await _adminService.GetUserActivityLogAsync(requestModel);
             return StatusCode(result.StatusCode, result);
         }
+
 
         /// <summary>
         /// Removes door from group.

@@ -20,6 +20,8 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <summary>
         /// Authenticate as user and returns a jwt token for subsequent operations.
         /// </summary>
+        /// <response code="200">If the operation is successful</response>
+        /// <response code="403">If user credentials are correct but the account is inactive.</response>
         [AllowAnonymous]
         [Route("Login")]
         [HttpPost]

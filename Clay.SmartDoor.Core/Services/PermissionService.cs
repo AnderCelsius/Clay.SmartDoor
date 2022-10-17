@@ -37,7 +37,7 @@ namespace Clay.SmartDoor.Core.Services
 
             if(role == null)
             {
-                return ApiResponse<PermissionsDto>.Fail("Some");
+                return ApiResponse<PermissionsDto>.Fail(Constants.Generic_Not_Found_Message);
             }
 
             var claims = await _roleManager.GetClaimsAsync(role);
@@ -70,12 +70,12 @@ namespace Clay.SmartDoor.Core.Services
         {
             var allPermissions = new List<RoleClaimDto>();
 
-            allPermissions.GetPermission(typeof(Permissions.Door));
+            allPermissions.GetPermission(typeof(Permissions.Access));
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
             {
-                return ApiResponse<PermissionsDto>.Fail("Some");
+                return ApiResponse<PermissionsDto>.Fail(Constants.Generic_Not_Found_Message);
             }
 
             var claims = await _userManager.GetClaimsAsync(user);
