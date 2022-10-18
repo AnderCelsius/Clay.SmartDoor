@@ -5,7 +5,7 @@
         IDoorRepository Doors { get; }
         IActivityLogRepository ActivityLogs { get; }
         IAccessGroupRepository AccessGroups { get; }
-        IDoorAssignmentService DoorAssignments { get; }
+        IDoorAssignmentRepository DoorAssignments { get; }
         Task<int> SaveAsync();
     }
 }

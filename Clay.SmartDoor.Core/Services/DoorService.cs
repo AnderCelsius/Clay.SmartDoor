@@ -118,7 +118,7 @@ namespace Clay.SmartDoor.Core.Services
             catch (Exception ex)
             {
                 _logger.Error(ex, ex.Message);
-                return ApiResponse<IEnumerable<DoorDetails>>.Fail(Constants.Generic_Operation_Failed_Message);
+                return ApiResponse<IEnumerable<DoorDetails>>.Fail(Constants.Generic_Operation_Failed_Message, 500);
             }
         }
 
@@ -127,16 +127,15 @@ namespace Clay.SmartDoor.Core.Services
             try
             {
                 _logger.Information(Constants.Generic_Begin_Operation_Message);
-                var door = await _unitOfWork.Doors.GetAsync(d => d.Id == model.DoorId);
+                var door = await _unitOfWork.Doors.GetDoorAsync(model.DoorId);
 
                 if(door == null)
                 {
                     _logger.Information(Constants.Generic_Operation_Failed_Message);
                     return ApiResponse<string>.Fail(DoorMessage.Not_Found);
                 }
- 
-                var assignedDoor = await _unitOfWork.DoorAssignments
-                    .GetAsync(da => da.DoorId == model.DoorId && da.AccessGroupId == model.AccessGroupId && da.Assigned == true);
+
+                var assignedDoor = await _unitOfWork.DoorAssignments.GetDoorAssignmentAsync(model.DoorId, model.AccessGroupId);
 
                 if (assignedDoor == null)
                 {
@@ -170,7 +169,7 @@ namespace Clay.SmartDoor.Core.Services
             catch (Exception ex)
             {
                 _logger.Error(ex, ex.Message);
-                return ApiResponse<string>.Fail(Constants.Generic_Operation_Failed_Message);
+                return ApiResponse<string>.Fail(Constants.Generic_Operation_Failed_Message, 400);
             }
         }
     }

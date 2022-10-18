@@ -61,7 +61,7 @@ namespace Clay.SmartDoor.Test.Helper
             AccessGroupId = Default_AccessGroup
         };
 
-        public static string ActionBy = TestDataGenerator.Default_Id;
+        public static string ActionBy = Default_Id;
         public static CreateDoorRecord RequestModel = new("Main Door", "Uno", "1st Floor");
 
         public static Door DefaultDoor = new()
@@ -75,7 +75,7 @@ namespace Clay.SmartDoor.Test.Helper
             Floor = RequestModel.Floor
         };
 
-        public static ActivityLog activityLog = new ActivityLog
+        public static ActivityLog activityLog = new()
         {
             Time = DateTime.Now,
             Description = ActivityDescriptions.Door_Created,
@@ -86,23 +86,27 @@ namespace Clay.SmartDoor.Test.Helper
             DoorTag = DefaultDoor.NameTag,
         };
 
-        public static IEnumerable<DoorDetails> GenerateDummyDoors(List<string> doorIds)
+        public static IEnumerable<Door> GenerateDummyDoors(List<string> doorIds)
         {
-            List<DoorDetails> doors = new();
+            List<Door> doors = new();
             int count = 0;
             foreach(var id in doorIds)
             {
                 count++;
-                doors.Add(new DoorDetails
+                doors.Add(new Door
                 {
                     Id = id,
                     NameTag = $"{RequestModel.NameTag}-{count}",
                     Floor = RequestModel.Floor,
                     Building = RequestModel.Building,
+                    CreatedAt = DateTime.Now,
+                    LastModified = DateTime.Now,
+                    CreatedBy = SuperAdminUser.Id
                 });
             }
 
             return doors;
         }
+
     }
 }

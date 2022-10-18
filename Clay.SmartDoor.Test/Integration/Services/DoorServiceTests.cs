@@ -127,5 +127,130 @@ namespace Clay.SmartDoor.Test.Integration.Services
             result.Succeeded.ShouldBe(true);
         }
 
+        [Fact]
+        public async Task GetDoorsAsync_ShouldListOfDoorDetailsAndOkResponse_WhenDoorsExist()
+        {
+            // Arrange
+            var doorIds = new List<string>()
+            {
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString()
+            };
+           
+            var doors = TestDataGenerator.GenerateDummyDoors(doorIds);
+            mockUnitOfWork.Setup(uow => uow.Doors.GetAllDoorsAsync()).Returns(doors.AsQueryable());
+
+            // Act
+            var result = await _sut.GetDoorsAsync();
+
+            // Assert
+            result.StatusCode.ShouldBe((int)HttpStatusCode.OK);
+            result.Message.ShouldBe(ApiResponseMesage.Ok_Result);
+            result.Data.Count().ShouldBe(3);
+            result.Succeeded.ShouldBe(true);
+        }
+
+        [Fact]
+        public async Task GetDoorsAsync_ShouldHandleExceptionAndReturnFailedResponse_WhenAnyFailsToAdd()
+        {
+            // Arrange
+            var doorIds = new List<string>()
+            {
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString()
+            };
+
+            var doors = TestDataGenerator.GenerateDummyDoors(doorIds);
+            mockUnitOfWork.Setup(uow => uow.Doors.GetAllDoorsAsync()).Throws(new Exception());
+
+            // Act
+            var result = await _sut.GetDoorsAsync();
+
+            // Assert
+            result.StatusCode.ShouldBe((int)HttpStatusCode.InternalServerError);
+            result.Message.ShouldBe(Core.Models.Constants.Constants.Generic_Operation_Failed_Message);
+            result.Succeeded.ShouldBe(false);
+        }
+
+        [Fact]
+        public async Task OpenDoorAsync_ShouldReturnForbiddenResponse_WhenUserDoesNotBelongToAccessGroup()
+        {
+            // Arrange
+            var requestModel = new DoorAccessRequest
+            {
+                DoorId = TestDataGenerator.Default_Door_Id
+            };
+            DoorAssignment doorAssignment = null!;
+            Door door = TestDataGenerator.DefaultDoor;
+            mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(door);
+            mockUnitOfWork.Setup(uow => uow.DoorAssignments
+                        .GetDoorAssignmentAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(doorAssignment);
+
+            // Act
+            var result = await _sut.OpenDoorAsync(requestModel, It.IsAny<string>());
+
+            // Assert
+            result.StatusCode.ShouldBe((int)HttpStatusCode.Forbidden);
+            result.Message.ShouldBe(AuthenticationMessage.Forbidden);
+            result.Succeeded.ShouldBe(false);
+        }
+
+        [Fact]
+        public async Task OpenDoorAsync_ShouldHandleExceptionAndReturnFailedResponse_WhenAnyFailsToAdd()
+        {
+            // Arrange
+            var requestModel = new DoorAccessRequest
+            {
+                DoorId = TestDataGenerator.Default_Door_Id
+            };
+
+            Door door = TestDataGenerator.DefaultDoor;
+
+            mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(door);
+            mockUnitOfWork.Setup(uow => uow.DoorAssignments
+                        .GetDoorAssignmentAsync(It.IsAny<string>(), It.IsAny<string>())).Throws(new Exception());
+
+            // Act
+            var result = await _sut.OpenDoorAsync(requestModel, It.IsAny<string>());
+
+            // Assert
+            result.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);
+            result.Message.ShouldBe(Constants.Generic_Operation_Failed_Message);
+            result.Succeeded.ShouldBe(false);
+        }
+
+        [Fact]
+        public async Task OpenDoorAsync_ShouldReturnOkResponse_WhenDoorOpens()
+        {
+            // Arrange
+            var requestModel = new DoorAccessRequest
+            {
+                DoorId = TestDataGenerator.Default_Door_Id,
+                AccessGroupId = TestDataGenerator.Default_AccessGroup
+            };
+
+            Door door = TestDataGenerator.DefaultDoor;
+
+            var doorAssignment = new DoorAssignment
+            {
+                DoorId = TestDataGenerator.Default_Door_Id,
+                AccessGroupId = TestDataGenerator.Default_AccessGroup,
+                Assigned = true
+            };
+
+            mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(door);
+            mockUnitOfWork.Setup(uow => uow.DoorAssignments
+                        .GetDoorAssignmentAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(doorAssignment);
+
+            // Act
+            var result = await _sut.OpenDoorAsync(requestModel, It.IsAny<string>());
+
+            // Assert
+            result.StatusCode.ShouldBe((int)HttpStatusCode.OK);
+            result.Message.ShouldBe(ApiResponseMesage.Ok_Result);
+            result.Succeeded.ShouldBe(true);
+        }
     }
 }

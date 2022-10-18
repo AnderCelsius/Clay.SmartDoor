@@ -12,13 +12,13 @@ namespace Clay.SmartDoor.Test.Extensions
         {
             services.AddAuthorization(options =>
             {
-                options.DefaultPolicy = new AuthorizationPolicyBuilder(Constants.Scheme)
+                options.DefaultPolicy = new AuthorizationPolicyBuilder(TestConstants.Scheme)
                     .RequireAuthenticatedUser()
                     .Build();
             });
 
-            return services.AddAuthentication(Constants.Scheme)
-                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(Constants.Scheme, options => { });
+            return services.AddAuthentication(TestConstants.Scheme)
+                .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestConstants.Scheme, options => { });
         }
     }
 }

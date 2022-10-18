@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Clay.SmartDoor.Test.Helper
 {
-    internal static class Constants
+    internal static class TestConstants
     {
         public const string Scheme = "";
     }

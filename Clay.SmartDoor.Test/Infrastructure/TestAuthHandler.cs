@@ -28,9 +28,9 @@ namespace Clay.SmartDoor.Test.Infrastructure
                 return Task.FromResult(AuthenticateResult.Fail("Mock auth user not configured."));
 
             // 2. Create the principal and the ticket
-            var identity = new ClaimsIdentity(_mockAuthUser.Claims, Constants.Scheme);
+            var identity = new ClaimsIdentity(_mockAuthUser.Claims, TestConstants.Scheme);
             var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, Constants.Scheme);
+            var ticket = new AuthenticationTicket(principal, TestConstants.Scheme);
 
             // 3. Authenticate the request
             var result = AuthenticateResult.Success(ticket);
