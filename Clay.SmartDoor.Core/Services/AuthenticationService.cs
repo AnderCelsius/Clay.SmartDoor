@@ -73,11 +73,10 @@ namespace Clay.SmartDoor.Core.Services
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                return (false, AuthenticationMessage.Invalid_Credentials, (int)HttpStatusCode.BadRequest, null!);
+                return (false, AuthenticationMessage.Invalid_Credentials, (int)HttpStatusCode.Unauthorized, null!);
             }
-            if (!await _userManager.IsEmailConfirmedAsync(user) && user.IsActive)
+            if (!await _userManager.IsEmailConfirmedAsync(user) || !user.IsActive)
             {
-                ;
                 return (false, AuthenticationMessage.Not_Activated, (int)HttpStatusCode.Forbidden, null!);
             }
             return (true, AuthenticationMessage.Login_Success, 200, user);
@@ -99,7 +98,7 @@ namespace Clay.SmartDoor.Core.Services
                 new Claim(ClaimTypes.Surname, user.LastName),
             };
 
-            var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
+            var key = Encoding.UTF8.GetBytes(_configuration.GetValue<string>("Key"));
 
             //Gets the roles of the logged in user and adds it to Claims
             var roles = await _userManager.GetRolesAsync(user);
@@ -122,8 +121,8 @@ namespace Clay.SmartDoor.Core.Services
             var signingKey = new SymmetricSecurityKey(key);
 
             var token = new JwtSecurityToken
-            (audience: _configuration["Jwt:Audience"],
-             issuer: _configuration["Jwt:Issuer"],
+            (audience: _configuration.GetValue<string>("Audience"),
+             issuer: _configuration.GetValue<string>("Issuer"),
              claims: authClaims,
              expires: DateTime.Now.AddMinutes(2),
              signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256));

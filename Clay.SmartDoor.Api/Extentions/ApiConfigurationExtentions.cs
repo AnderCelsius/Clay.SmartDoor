@@ -20,26 +20,6 @@ namespace Clay.SmartDoor.Api.Extentions
     /// </summary>
     public static class ApiConfigurationExtentions
     {
-
-        /// <summary>
-        /// Adds the JSON configuration provider to the builder
-        /// depending on the current environment.
-        /// </summary>
-        /// <param name="isDevelopment"></param>
-        /// <returns>An <seealso cref="IConfigurationRoot"/> with 
-        /// keys and values from the registered sources</returns>
-        public static IConfiguration GetConfig(bool isDevelopment)
-        {
-            return isDevelopment ? new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build()
-            :
-            new ConfigurationBuilder()
-            .AddEnvironmentVariables()
-            .Build();
-        }
-
         /// <summary>
         /// Adds and configures the identity system for <seealso cref="AppUser"/>
         /// and <seealso cref="IdentityRole"/>. Then uses the IdentityBuilder to 
@@ -216,7 +196,7 @@ namespace Clay.SmartDoor.Api.Extentions
             var userManager = services.GetRequiredService<UserManager<AppUser>>();
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-            SmartDoorDataSeeder.SeedAsync(db, userManager, roleManager).GetAwaiter().GetResult(); ;
+            SmartDoorDataSeeder.SeedAsync(db, userManager, roleManager).GetAwaiter().GetResult();
         }
 
         /// <summary>

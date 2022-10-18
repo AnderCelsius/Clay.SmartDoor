@@ -8,14 +8,16 @@ using System.Text.Json.Serialization;
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 var isDevelopment = environment == Environments.Development;
 
-IConfiguration config = ApiConfigurationExtentions.GetConfig(isDevelopment);
-LogSettings.SetUpSerilog(config);
+IConfiguration config;
 
 try
 {
     Log.Information("Application is starting...");
 
     var builder = WebApplication.CreateBuilder(args);
+    config = builder.Configuration;
+    LogSettings.SetUpSerilog(builder.Configuration);
+
 
     // Add services to the container.
 
