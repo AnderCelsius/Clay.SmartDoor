@@ -23,7 +23,7 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="200">If the operation is successful</response>
         /// <response code="403">If user credentials are correct but the account is inactive.</response>
         [AllowAnonymous]
-        [Route("Login")]
+        [Route("login")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]

@@ -29,7 +29,7 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="201">If the door is created</response>
         /// <response code="401">when caller is not calling this enpoint with the right bearer token</response>
         /// <response code="403">When caller does not belong to the required group to create door</response>
-        [Route("add-door")]
+        [Route("add")]
         [HttpPost]
         [Authorize(Policy = Permissions.Access.Create)]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -53,7 +53,7 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="200">If the user successfully gets access</response>
         /// <response code="401">when caller is not calling this enpoint with the right bearer token</response>
         /// <response code="403">When caller does not belong to the required group to access door</response>
-        [Route("exit-door")]
+        [Route("exit")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -72,7 +72,7 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <returns></returns>
         /// <response code="200">When the API call completes</response>
         /// <response code="401">when caller is not calling this enpoind with the right bearer token</response> 
-        [Route("get-door")]
+        [Route("get-all")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -91,7 +91,7 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="202">If the user successfully gets access</response>
         /// <response code="401">when caller is not calling this enpoint with the right bearer token</response>
         /// <response code="403">When caller does not belong to the required group to access door</response>
-        [Route("open-door")]
+        [Route("open")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
