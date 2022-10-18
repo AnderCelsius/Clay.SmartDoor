@@ -1,6 +1,8 @@
 ﻿using Clay.SmartDoor.Core.DTOs.Doors;
 using Clay.SmartDoor.Core.Entities;
 using Clay.SmartDoor.Core.Models.Constants;
+using Clay.SmartDoor.Core.Models.Enums;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 
@@ -107,6 +109,20 @@ namespace Clay.SmartDoor.Test.Helper
 
             return doors;
         }
+
+        public static List<AppUser> DummyUsers = new()
+        {
+            SuperAdminUser,
+            AdminUser,
+            BasicUser,
+        };
+
+        public static List<IdentityRole> DummyRoles = new()
+        {
+            new IdentityRole(Roles.SuperAdmin.ToString()),
+            new IdentityRole(Roles.Admin.ToString()),
+            new IdentityRole(Roles.Basic.ToString())
+        };
 
     }
 }

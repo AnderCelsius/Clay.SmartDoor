@@ -28,8 +28,8 @@ namespace Clay.SmartDoor.Test.Integration.Services
         private readonly Mock<RoleManager<IdentityRole>> _roleManager;
         public AuthenticationServiceTests()
         {
-            _userManager = MockHelpers.MockUserManager<AppUser>(_users);
-            _roleManager = MockHelpers.MockRoleManager<IdentityRole>(_roles);
+            _userManager = MockHelpers.MockUserManager<AppUser>(TestDataGenerator.DummyUsers);
+            _roleManager = MockHelpers.MockRoleManager<IdentityRole>(TestDataGenerator.DummyRoles);
             _sut = new AuthenticationService(
                         mockLogger.Object, _userManager.Object,
                         _roleManager.Object, mockConfiguration.Object);
@@ -93,20 +93,6 @@ namespace Clay.SmartDoor.Test.Integration.Services
             response.Message.ShouldBe(AuthenticationMessage.Not_Activated);
             response.StatusCode.ShouldBe((int)HttpStatusCode.Forbidden);
         }
-
-        private static List<AppUser> _users = new()
-        {
-            TestDataGenerator.SuperAdminUser,
-            TestDataGenerator.AdminUser,
-            TestDataGenerator.BasicUser,
-        };
-
-        private static List<IdentityRole> _roles = new()
-        {
-            new IdentityRole(Roles.SuperAdmin.ToString()),
-            new IdentityRole(Roles.Admin.ToString()),
-            new IdentityRole(Roles.Basic.ToString())
-        };
 
     }
 }

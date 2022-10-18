@@ -12,6 +12,7 @@ using Clay.SmartDoor.Core.Models.Pagination;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Net;
 using System.Transactions;
 
 namespace Clay.SmartDoor.Core.Services
@@ -33,6 +34,50 @@ namespace Clay.SmartDoor.Core.Services
             _logger = logger;
         }
 
+        public async Task<ApiResponse<string>> AddAccessGroupAsync(string groupName, string actionBy)
+        {
+            try
+            {
+                var groupExist = await _unitOfWork.AccessGroups.GetAccessGroupsAsync(groupName);
+                if (groupExist != null)
+                {
+                    return ApiResponse<string>.Fail(Constants.Generic_Fail_Already_Exist_Message, (int)HttpStatusCode.BadRequest);
+                }
+
+                var accessGroup = new AccessGroup
+                {
+                    Name = groupName,
+                    CreatedAt = DateTime.Now,
+                    LastModified = DateTime.Now,
+                    IsActive = true,
+                    CreatedBy = actionBy
+                };
+
+                var activilog = new ActivityLog
+                {
+                    Time = DateTime.Now,
+                    Description = ActivityDescriptions.Group_Created,
+                    ActionBy = actionBy,
+                };
+
+                await _unitOfWork.AccessGroups.AddAsync(accessGroup);
+                await _unitOfWork.ActivityLogs.AddAsync(activilog);
+
+                var saveResult = await _unitOfWork.SaveAsync();
+
+
+                _logger.Information(saveResult > 0 ? Constants.Generic_Save_Success_Message
+                    : Constants.Generic_Failure_Message);
+
+                return ApiResponse<string>.Success(ApiResponseMesage.Created_Successfully, ApiResponseMesage.Ok_Result, 201);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, ex.Message);
+                return ApiResponse<string>.Fail(Constants.Generic_Operation_Failed_Message, 400);
+            }
+        }
+
         public async Task<ApiResponse<string>> AddUserAsync(NewUserRequest requestModel, string actionBy)
         {
             try
@@ -40,7 +85,7 @@ namespace Clay.SmartDoor.Core.Services
                 var userExist = await _userManager.FindByEmailAsync(requestModel.Email);
                 if (userExist != null)
                 {
-                    return ApiResponse<string>.Fail(AuthenticationMessage.User_Already_Exist);
+                    return ApiResponse<string>.Fail(AuthenticationMessage.User_Already_Exist, 400);
                 }
 
                 var user = new AppUser
@@ -84,51 +129,7 @@ namespace Clay.SmartDoor.Core.Services
             catch (Exception ex)
             {
                 _logger.Error(ex, ex.Message);
-                return ApiResponse<string>.Fail(Constants.Generic_Operation_Failed_Message);
-            }
-        }
-
-        public async Task<ApiResponse<string>> AddAccessGroupAsync(string groupName, string actionBy)
-        {
-            try
-            {
-                var groupExist = await _unitOfWork.AccessGroups.GetAsync(g => g.Name == groupName);
-                if(groupExist != null)
-                {
-                    return ApiResponse<string>.Fail(Constants.Generic_Fail_Already_Exist_Message);
-                }
-
-                var accessGroup = new AccessGroup
-                {
-                    Name = groupName,
-                    CreatedAt = DateTime.Now,
-                    LastModified = DateTime.Now,
-                    IsActive = true,
-                    CreatedBy = actionBy
-                };
-
-                var activilog = new ActivityLog
-                {
-                    Time = DateTime.Now,
-                    Description = ActivityDescriptions.Group_Created,
-                    ActionBy = actionBy,
-                };
-
-                await _unitOfWork.AccessGroups.AddAsync(accessGroup);
-                await _unitOfWork.ActivityLogs.AddAsync(activilog);
-
-                var saveResult = await _unitOfWork.SaveAsync();
-
-
-                _logger.Information(saveResult > 0 ? Constants.Generic_Save_Success_Message
-                    : Constants.Generic_Failure_Message);
-
-                return ApiResponse<string>.Success(ApiResponseMesage.Created_Successfully,ApiResponseMesage.Ok_Result, 201);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, ex.Message);
-                return ApiResponse<string>.Fail(Constants.Generic_Operation_Failed_Message);
+                return ApiResponse<string>.Fail(Constants.Generic_Operation_Failed_Message, 400);
             }
         }
 
@@ -145,21 +146,22 @@ namespace Clay.SmartDoor.Core.Services
                 else
                 {
                     var isActive = groupState == GroupState.Active;
-                    accessGroups = _unitOfWork.AccessGroups.GetAll(g => g.IsActive == isActive);
+                    accessGroups = _unitOfWork.AccessGroups.GetAccessGroupsByActiveStatusAsync(isActive);
                 }
 
                 return new ApiResponse<IEnumerable<AccessGroup>>
                 {
-                    Data = await accessGroups.ToListAsync(),
+                    Data = await accessGroups.ToListAsyncSafe(),
                     Succeeded = true,
-                    StatusCode = 200
+                    StatusCode = 200,
+                    Message = ApiResponseMesage.Ok_Result
                 };
 
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, ex.Message);
-                return ApiResponse<IEnumerable<AccessGroup>>.Fail(Constants.Generic_Operation_Failed_Message);
+                return ApiResponse<IEnumerable<AccessGroup>>.Fail(Constants.Generic_Operation_Failed_Message, 400);
             }
         }
 

@@ -111,7 +111,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
         }
 
         [Fact]
-        public async Task GetDoorsAsync_ShouldOkResponse_WhenNoDoorExist()
+        public async Task GetDoorsAsync_ShouldReturnEmptyListAndOkResponse_WhenNoDoorExist()
         {
             // Arrange
             List<Door> doors = new();
@@ -128,7 +128,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
         }
 
         [Fact]
-        public async Task GetDoorsAsync_ShouldListOfDoorDetailsAndOkResponse_WhenDoorsExist()
+        public async Task GetDoorsAsync_ShouldReturnListOfDoorDetailsAndOkResponse_WhenDoorsExist()
         {
             // Arrange
             var doorIds = new List<string>()
@@ -152,7 +152,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
         }
 
         [Fact]
-        public async Task GetDoorsAsync_ShouldHandleExceptionAndReturnFailedResponse_WhenAnyFailsToAdd()
+        public async Task GetDoorsAsync_ShouldHandleExceptionAndReturnFailedResponse_WhenExceptionIsThrown()
         {
             // Arrange
             var doorIds = new List<string>()
