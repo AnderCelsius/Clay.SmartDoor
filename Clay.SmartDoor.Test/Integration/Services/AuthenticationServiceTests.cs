@@ -15,7 +15,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace Clay.SmartDoor.Test.Integration
+namespace Clay.SmartDoor.Test.Integration.Services
 {
     public class AuthenticationServiceTests
     {

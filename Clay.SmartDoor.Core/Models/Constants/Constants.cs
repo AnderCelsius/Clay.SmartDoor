@@ -11,6 +11,7 @@
         public const string Generic_Fail_Already_Exist_Message = "Operation failed. Item already exist.";
         public const string Generic_Fail_Does_Not_Exist_Message = "Operation failed. Item does not exist in group.";
         public const string Generic_Save_Fail_Message = "Failed to save.";
+        public const string Generic_Activity_Logged_Message = "Activity logged.";
     }
     public class ActivityDescriptions
     {

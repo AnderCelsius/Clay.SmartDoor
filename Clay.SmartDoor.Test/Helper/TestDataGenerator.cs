@@ -1,12 +1,17 @@
-﻿using Clay.SmartDoor.Core.Entities;
+﻿using Clay.SmartDoor.Core.DTOs.Doors;
+using Clay.SmartDoor.Core.Entities;
+using Clay.SmartDoor.Core.Models.Constants;
+using System;
+using System.Collections.Generic;
 
 namespace Clay.SmartDoor.Test.Helper
 {
     internal class TestDataGenerator
     {
-        private const string Default_Password = "Password@123";
-        private const string Default_AccessGroup = "33e09d95-60c1-41ed-a2ae-faff5e711078";
-        private const string Default_SecureGroup_One = "ba63545f-2c49-4954-983c-bef094a4027a";
+        public const string Default_Id = "33e09d95-51d3-41ed-a2ae-faff5e711078";
+        public const string Default_Door_Id = "bef094a4027a-51d3-41ed-a2ae-ba63545f";
+        public const string Default_AccessGroup = "33e09d95-60c1-41ed-a2ae-faff5e711078";
+        public const string Default_SecureGroup_One = "ba63545f-2c49-4954-983c-bef094a4027a";
 
         public static AppUser SuperAdminUser = new()
         {
@@ -55,5 +60,49 @@ namespace Clay.SmartDoor.Test.Helper
             IsActive = false,
             AccessGroupId = Default_AccessGroup
         };
+
+        public static string ActionBy = TestDataGenerator.Default_Id;
+        public static CreateDoorRecord RequestModel = new("Main Door", "Uno", "1st Floor");
+
+        public static Door DefaultDoor = new()
+        {
+            Id = Default_Door_Id,
+            NameTag = RequestModel.NameTag,
+            CreatedAt = DateTime.Now,
+            LastModified = DateTime.Now,
+            CreatedBy = Default_Id,
+            Building = RequestModel.Building,
+            Floor = RequestModel.Floor
+        };
+
+        public static ActivityLog activityLog = new ActivityLog
+        {
+            Time = DateTime.Now,
+            Description = ActivityDescriptions.Door_Created,
+            ActionBy = ActionBy,
+            DoorId = DefaultDoor.Id,
+            Building = RequestModel.Building,
+            Floor = RequestModel.Floor,
+            DoorTag = DefaultDoor.NameTag,
+        };
+
+        public static IEnumerable<DoorDetails> GenerateDummyDoors(List<string> doorIds)
+        {
+            List<DoorDetails> doors = new();
+            int count = 0;
+            foreach(var id in doorIds)
+            {
+                count++;
+                doors.Add(new DoorDetails
+                {
+                    Id = id,
+                    NameTag = $"{RequestModel.NameTag}-{count}",
+                    Floor = RequestModel.Floor,
+                    Building = RequestModel.Building,
+                });
+            }
+
+            return doors;
+        }
     }
 }

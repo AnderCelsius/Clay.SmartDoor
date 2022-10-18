@@ -4,6 +4,7 @@ namespace Clay.SmartDoor.Core.Interfaces.InfrastructureServices
 {
     public interface IDoorRepository : IGenericRepository<Door>
     {
-        Task<Door?> GetWithNoTrackingAsync(string doorId);
+        Task<Door?> GetDoorAsync(string doorId);
+        IQueryable<Door> GetAllDoorsAsync();
     }
 }

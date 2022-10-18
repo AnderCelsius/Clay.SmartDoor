@@ -7,6 +7,7 @@ using Clay.SmartDoor.Core.Models;
 using Clay.SmartDoor.Core.Models.Constants;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using System.Net;
 
 namespace Clay.SmartDoor.Core.Services
 {
@@ -25,12 +26,12 @@ namespace Clay.SmartDoor.Core.Services
         {
             try
             {
-                _logger.Information("Beginning add operation...");
+                _logger.Information(Constants.Generic_Begin_Operation_Message);
                 var door = model.ToDoor(DateTime.Now, DateTime.Now, creatorId);
 
                 // Create door
                 await _unitOfWork.Doors.AddAsync(door);
-                _logger.Information("Door added");
+                _logger.Information(ActivityDescriptions.Door_Created);
 
                 var activityLog = new ActivityLog
                 {
@@ -44,7 +45,7 @@ namespace Clay.SmartDoor.Core.Services
                 };
 
                 await _unitOfWork.ActivityLogs.AddAsync(activityLog);
-                _logger.Information("Activity logged");
+                _logger.Information(Constants.Generic_Activity_Logged_Message);
 
                 var saveResult = await _unitOfWork.SaveAsync();
 
@@ -57,7 +58,7 @@ namespace Clay.SmartDoor.Core.Services
             catch (Exception ex)
             {
                 _logger.Error(ex, ex.Message);
-                return ApiResponse<string>.Fail(ApiResponseMesage.Failed_To_Create);
+                return ApiResponse<string>.Fail(ApiResponseMesage.Failed_To_Create, 400);
             }
         }
     
@@ -66,12 +67,12 @@ namespace Clay.SmartDoor.Core.Services
             try
             {
                 _logger.Information(Constants.Generic_Begin_Operation_Message);
-                var door = await _unitOfWork.Doors.GetAsync(d => d.Id == doorId);
+                var door = await _unitOfWork.Doors.GetDoorAsync(doorId);
 
                 if (door == null)
                 {
                     _logger.Information(Constants.Generic_Operation_Failed_Message);
-                    return ApiResponse<string>.Fail(DoorMessage.Not_Found);
+                    return ApiResponse<string>.Fail(DoorMessage.Not_Found, (int)HttpStatusCode.NotFound);
                 }
 
                 var activityLog = new ActivityLog
@@ -108,8 +109,8 @@ namespace Clay.SmartDoor.Core.Services
             try
             {
                 _logger.Information(Constants.Generic_Begin_Operation_Message);
-                var doorsQuery = _unitOfWork.Doors.GetAll(orderBy: d => d.OrderByDescending(x => x.CreatedAt));
-                var doorDetailsList = await doorsQuery.Select(door => door.ToDoorDetails()).ToListAsync();
+                var doorsQuery = _unitOfWork.Doors.GetAllDoorsAsync();
+                var doorDetailsList = await doorsQuery.Select(door => door.ToDoorDetails()).ToListAsyncSafe();
 
                 _logger.Information(Constants.Generic_Success_Message);
                 return ApiResponse<IEnumerable<DoorDetails>>.Success(ApiResponseMesage.Ok_Result, doorDetailsList);
