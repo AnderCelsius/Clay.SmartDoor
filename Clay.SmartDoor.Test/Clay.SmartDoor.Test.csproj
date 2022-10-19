@@ -33,8 +33,4 @@
     <ProjectReference Include="..\Clay.SmartDoor.Infrastructure\Clay.SmartDoor.Infrastructure.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Integration\Controllers\" />
-  </ItemGroup>
-
 </Project>
