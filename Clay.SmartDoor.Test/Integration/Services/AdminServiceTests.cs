@@ -42,16 +42,20 @@ namespace Clay.SmartDoor.Test.Integration.Services
         {
             // Arrange
             var groupName = "Test";
+            var requestModel = new NewAccessGroup
+            {
+                GroupName = groupName,
+            };
             var accessGroup = new AccessGroup
             {
                 Name = groupName,
                 IsActive = true,
                 Users = TestDataGenerator.DummyUsers
             };
-            _mockUnitOfWork.Setup(uow => uow.AccessGroups.GetAccessGroupsAsync(groupName)).ReturnsAsync(accessGroup);
+            _mockUnitOfWork.Setup(uow => uow.AccessGroups.GetAccessGroupByNameAsync(groupName)).ReturnsAsync(accessGroup);
 
             // Act
-            var response = await _sut.AddAccessGroupAsync(groupName, TestDataGenerator.SuperAdminUser.Id);
+            var response = await _sut.AddAccessGroupAsync(requestModel, TestDataGenerator.SuperAdminUser.Id);
 
             // Assert
             response.Message.ShouldBe(Constants.Generic_Fail_Already_Exist_Message);
@@ -64,6 +68,10 @@ namespace Clay.SmartDoor.Test.Integration.Services
         {
             // Arrange
             var groupName = "Test";
+            var requestModel = new NewAccessGroup
+            {
+                GroupName = groupName,
+            };
             var accessGroup = new AccessGroup
             {
                 Name = groupName,
@@ -72,10 +80,10 @@ namespace Clay.SmartDoor.Test.Integration.Services
             };
 
             AccessGroup noAccessGroup = null!;
-            _mockUnitOfWork.Setup(uow => uow.AccessGroups.GetAccessGroupsAsync(groupName)).ReturnsAsync(noAccessGroup);
+            _mockUnitOfWork.Setup(uow => uow.AccessGroups.GetAccessGroupByNameAsync(groupName)).ReturnsAsync(noAccessGroup);
 
             // Act
-            var response = await _sut.AddAccessGroupAsync(groupName, TestDataGenerator.ActionBy);
+            var response = await _sut.AddAccessGroupAsync(requestModel, TestDataGenerator.ActionBy);
 
             // Assert
             response.Message.ShouldBe(ApiResponseMesage.Created_Successfully);
@@ -88,6 +96,10 @@ namespace Clay.SmartDoor.Test.Integration.Services
         {
             // Arrange
             var groupName = "Test";
+            var requestModel = new NewAccessGroup
+            {
+                GroupName = groupName,
+            };
             var accessGroup = new AccessGroup
             {
                 Name = groupName,
@@ -96,11 +108,11 @@ namespace Clay.SmartDoor.Test.Integration.Services
             };
 
             AccessGroup noAccessGroup = null!;
-            _mockUnitOfWork.Setup(uow => uow.AccessGroups.GetAccessGroupsAsync(groupName)).ReturnsAsync(noAccessGroup);
+            _mockUnitOfWork.Setup(uow => uow.AccessGroups.GetAccessGroupByNameAsync(groupName)).ReturnsAsync(noAccessGroup);
             _mockUnitOfWork.Setup(uow => uow.ActivityLogs.AddAsync(It.IsAny<ActivityLog>())).Throws(new Exception());
 
             // Act
-            var response = await _sut.AddAccessGroupAsync(groupName, TestDataGenerator.ActionBy);
+            var response = await _sut.AddAccessGroupAsync(requestModel, TestDataGenerator.ActionBy);
 
             // Assert
             response.Message.ShouldBe(Constants.Generic_Operation_Failed_Message);
@@ -108,6 +120,98 @@ namespace Clay.SmartDoor.Test.Integration.Services
             response.Succeeded.ShouldBe(false);
         }
 
+        [Fact]
+        public async Task AddDoorToAcessGroupAsync_ShouldReturnFailResponse_WhenDoorDoesNotExist()
+        {
+            // Arrange
+            var model = new DoorAccessRequest
+            {
+                DoorId = TestDataGenerator.Default_Id,
+                AccessGroupId = TestDataGenerator.Default_AccessGroup
+            };
+
+            Door foundDoor = null!;
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(model.DoorId)).ReturnsAsync(foundDoor);
+
+            // Act
+            var response = await _sut.AddDoorToAcessGroupAsync(model, TestDataGenerator.SuperAdminUser.Id);
+
+            // Assert
+            response.Message.ShouldBe(DoorMessage.Not_Found);
+            response.StatusCode.ShouldBe((int)HttpStatusCode.NotFound);
+            response.Succeeded.ShouldBe(false);
+        }
+
+        [Fact]
+        public async Task AddDoorToAcessGroupAsync_ShouldReturnFailResponse_WhenDoorAlreadyBelongsToGroup()
+        {
+            // Arrange
+            var model = new DoorAccessRequest
+            {
+                DoorId = TestDataGenerator.Default_Id,
+                AccessGroupId = TestDataGenerator.Default_AccessGroup
+            };
+
+            var doorAssignment = new DoorAssignment();
+
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(model.DoorId)).ReturnsAsync(TestDataGenerator.DefaultDoor);
+            _mockUnitOfWork.Setup(uow => uow.DoorAssignments.GetDoorAssignmentAsync(model.DoorId, model.AccessGroupId)).ReturnsAsync(doorAssignment);
+
+            // Act
+            var response = await _sut.AddDoorToAcessGroupAsync(model, TestDataGenerator.SuperAdminUser.Id);
+
+            // Assert
+            response.Message.ShouldBe(Constants.Generic_Fail_Already_Exist_Message);
+            response.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);
+            response.Succeeded.ShouldBe(false);
+        }
+
+        [Fact]
+        public async Task AddDoorToAcessGroupAsync_ShouldReturnCreatedResponse_WhenDoorIsAddedToGroupSuccessfully()
+        {
+            // Arrange
+            var model = new DoorAccessRequest
+            {
+                DoorId = TestDataGenerator.Default_Id,
+                AccessGroupId = TestDataGenerator.Default_AccessGroup
+            };
+
+            DoorAssignment doorAssignment = null!;
+
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(model.DoorId)).ReturnsAsync(TestDataGenerator.DefaultDoor);
+            _mockUnitOfWork.Setup(uow => uow.DoorAssignments.GetDoorAssignmentAsync(model.DoorId, model.AccessGroupId)).ReturnsAsync(doorAssignment);
+
+            // Act
+            var response = await _sut.AddDoorToAcessGroupAsync(model, TestDataGenerator.SuperAdminUser.Id);
+
+            // Assert
+            response.Message.ShouldBe(DoorMessage.Add_to_Group_Success);
+            response.StatusCode.ShouldBe((int)HttpStatusCode.Created);
+            response.Succeeded.ShouldBe(true);
+        }
+
+        [Fact]
+        public async Task AddDoorToAcessGroupAsync_ShouldHandleExceptionAndReturnFailedResponse_WhenExceptionIsThrown()
+        {
+            // Arrange
+            var model = new DoorAccessRequest
+            {
+                DoorId = TestDataGenerator.Default_Id,
+                AccessGroupId = TestDataGenerator.Default_AccessGroup
+            };
+
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(model.DoorId)).ReturnsAsync(TestDataGenerator.DefaultDoor);
+            _mockUnitOfWork.Setup(uow => uow.DoorAssignments.GetDoorAssignmentAsync(model.DoorId, model.AccessGroupId)).Throws(new Exception());
+
+            // Act
+            var response = await _sut.AddDoorToAcessGroupAsync(model, TestDataGenerator.SuperAdminUser.Id);
+
+            // Assert
+            response.Message.ShouldBe(Constants.Generic_Operation_Failed_Message);
+            response.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);
+            response.Succeeded.ShouldBe(false);
+        }
+       
         [Fact]
         public async Task AddUserAsync_ShouldReturnFailResponse_WhenEmailExist()
         {
@@ -247,98 +351,6 @@ namespace Clay.SmartDoor.Test.Integration.Services
 
             // Act
             var response = await _sut.GetAllAccessGroupsAsync(GroupState.Active);
-
-            // Assert
-            response.Message.ShouldBe(Constants.Generic_Operation_Failed_Message);
-            response.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);
-            response.Succeeded.ShouldBe(false);
-        }
-
-        [Fact]
-        public async Task AddDoorToAcessGroupAsync_ShouldReturnFailResponse_WhenDoorDoesNotExist()
-        {
-            // Arrange
-            var model = new DoorAccessRequest
-            {
-                DoorId = TestDataGenerator.Default_Id,
-                AccessGroupId = TestDataGenerator.Default_AccessGroup
-            };
-
-            Door foundDoor = null!;
-            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(model.DoorId)).ReturnsAsync(foundDoor);
-
-            // Act
-            var response = await _sut.AddDoorToAcessGroupAsync(model, TestDataGenerator.SuperAdminUser.Id);
-
-            // Assert
-            response.Message.ShouldBe(DoorMessage.Not_Found);
-            response.StatusCode.ShouldBe((int)HttpStatusCode.NotFound);
-            response.Succeeded.ShouldBe(false);
-        }
-
-        [Fact]
-        public async Task AddDoorToAcessGroupAsync_ShouldReturnFailResponse_WhenDoorAlreadyBelongsToGroup()
-        {
-            // Arrange
-            var model = new DoorAccessRequest
-            {
-                DoorId = TestDataGenerator.Default_Id,
-                AccessGroupId = TestDataGenerator.Default_AccessGroup
-            };
-
-            var doorAssignment = new DoorAssignment();
-
-            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(model.DoorId)).ReturnsAsync(TestDataGenerator.DefaultDoor);
-            _mockUnitOfWork.Setup(uow => uow.DoorAssignments.GetDoorAssignmentAsync(model.DoorId, model.AccessGroupId)).ReturnsAsync(doorAssignment);
-
-            // Act
-            var response = await _sut.AddDoorToAcessGroupAsync(model, TestDataGenerator.SuperAdminUser.Id);
-
-            // Assert
-            response.Message.ShouldBe(Constants.Generic_Fail_Already_Exist_Message);
-            response.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);
-            response.Succeeded.ShouldBe(false);
-        }
-
-        [Fact]
-        public async Task AddDoorToAcessGroupAsync_ShouldReturnCreatedResponse_WhenDoorIsAddedToGroupSuccessfully()
-        {
-            // Arrange
-            var model = new DoorAccessRequest
-            {
-                DoorId = TestDataGenerator.Default_Id,
-                AccessGroupId = TestDataGenerator.Default_AccessGroup
-            };
-
-            DoorAssignment doorAssignment = null!;
-
-            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(model.DoorId)).ReturnsAsync(TestDataGenerator.DefaultDoor);
-            _mockUnitOfWork.Setup(uow => uow.DoorAssignments.GetDoorAssignmentAsync(model.DoorId, model.AccessGroupId)).ReturnsAsync(doorAssignment);
-
-            // Act
-            var response = await _sut.AddDoorToAcessGroupAsync(model, TestDataGenerator.SuperAdminUser.Id);
-
-            // Assert
-            response.Message.ShouldBe(ApiResponseMesage.Created_Successfully);
-            response.StatusCode.ShouldBe((int)HttpStatusCode.Created);
-            response.Succeeded.ShouldBe(true);
-        }
-
-        [Fact]
-        public async Task AddDoorToAcessGroupAsync_ShouldHandleExceptionAndReturnFailedResponse_WhenExceptionIsThrown()
-        {
-            // Arrange
-            var model = new DoorAccessRequest
-            {
-                DoorId = TestDataGenerator.Default_Id,
-                AccessGroupId = TestDataGenerator.Default_AccessGroup
-            };
-
-            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(model.DoorId)).ReturnsAsync(TestDataGenerator.DefaultDoor);
-            _mockUnitOfWork.Setup(uow => uow.DoorAssignments.GetDoorAssignmentAsync(model.DoorId, model.AccessGroupId)).Throws(new Exception());
-
-            // Act
-            var response = await _sut.AddDoorToAcessGroupAsync(model, TestDataGenerator.SuperAdminUser.Id);
 
             // Assert
             response.Message.ShouldBe(Constants.Generic_Operation_Failed_Message);

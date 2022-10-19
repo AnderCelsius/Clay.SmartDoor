@@ -28,22 +28,22 @@ namespace Clay.SmartDoor.Api.Controllers
         /// This will additionally log the activity.
         /// </summary>
         /// <param name="userId">The Id of the user calling the endpoint</param>
-        /// <param name="groupName">The name of the Access Group to be created</param>
+        /// <param name="requestModel"></param>
         /// <returns></returns>
         /// <response code="201">When the group is successfully created</response>
         /// <response code="401">If jwt token provided is invalid.</response>
         /// <response code="403">If caller does not have the permission to create.</response>
         [HttpPost]
         [Route("add-access-group")]
-        [Authorize(Policy = Permissions.Access.Create)]
+        [Authorize(Policy = "Access.Create")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<ActionResult> AddAccessGroup(
             [ModelBinder(BinderType = typeof(AuthenticatedUserIdBinder))] string userId,
-            string groupName)
+            [FromBody] NewAccessGroup requestModel)
         {
-            var result = await _adminService.AddAccessGroupAsync(groupName, userId);
+            var result = await _adminService.AddAccessGroupAsync(requestModel, userId);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -65,7 +65,7 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="403">If caller does not have the permission to create.</response>
         [HttpPost]
         [Route("add-door-to-access-group")]
-        [Authorize(Policy = Permissions.Access.Create)]
+        [Authorize(Policy = "Access.Create")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -91,7 +91,7 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="403">If caller does not have the permission to create user.</response>
         [HttpPost]
         [Route("add-user")]
-        [Authorize(Policy = Permissions.User.Create)]
+        [Authorize(Policy = "User.Create")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -100,6 +100,31 @@ namespace Clay.SmartDoor.Api.Controllers
             NewUserRequest requestModel)
         {
             var result = await _adminService.AddUserAsync(requestModel, userId);
+            return StatusCode(result.StatusCode, result);
+        }
+
+
+        /// <summary>
+        /// Adds a user to access group.
+        /// 
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="requestModel"></param>
+        /// <returns></returns>
+        /// <response code="201">When the user is successfully added to the group</response>
+        /// <response code="401">If jwt token provided is invalid.</response>
+        /// <response code="403">If caller does not have the permission to create user.</response>
+        [HttpPost]
+        [Route("add-user-to-access-group")]
+        [Authorize(Policy = "Access.Grant")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult> AddUserToAccessGroup(
+            [ModelBinder(BinderType = typeof(AuthenticatedUserIdBinder))] string userId,
+            NewUserToAccessGroup requestModel)
+        {
+            var result = await _adminService.AddUserToAccessGroupAsync(requestModel, userId);
             return StatusCode(result.StatusCode, result);
         }
 
@@ -158,8 +183,8 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="401">If jwt token provided is invalid.</response>
         /// <response code="403">If caller does not have the permission to perform the operation.</response>
         [HttpPost]
-        [Route("remove-door-from-group")]
-        [Authorize(Policy = Permissions.Access.Revoke)]
+        [Route("remove-door-from-access-group")]
+        [Authorize(Policy = "Access.Revoke")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]

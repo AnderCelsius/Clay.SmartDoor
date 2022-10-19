@@ -28,6 +28,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
         private readonly Mock<RoleManager<IdentityRole>> _roleManager;
         public AuthenticationServiceTests()
         {
+
             _userManager = MockHelpers.MockUserManager<AppUser>(TestDataGenerator.DummyUsers);
             _roleManager = MockHelpers.MockRoleManager<IdentityRole>(TestDataGenerator.DummyRoles);
             _sut = new AuthenticationService(
@@ -62,11 +63,11 @@ namespace Clay.SmartDoor.Test.Integration.Services
             _userManager.Setup(x => x.GetRolesAsync(TestDataGenerator.SuperAdminUser)).ReturnsAsync(new List<string> { role });
 
             _roleManager.Setup(x => x.FindByNameAsync(Roles.SuperAdmin.ToString())).ReturnsAsync(new IdentityRole(role));
-            _roleManager.Setup(x => x.GetClaimsAsync(It.IsAny<IdentityRole>())).ReturnsAsync(new List<Claim> { new Claim(ClaimTypes.Name, "Permission"),});
+            _roleManager.Setup(x => x.GetClaimsAsync(It.IsAny<IdentityRole>())).ReturnsAsync(new List<Claim> { new Claim(ClaimTypes.Name, "Permission"), });
 
-            mockConfigurationSection.Setup(x => x.Value).Returns("XYZk7Q1234g5p6DogCatL0MHappySadcOj6UpDown123");
+            mockConfigurationSection.Setup(x => x.GetSection("key").Value).Returns("XYZk7Q1234g5p6DogCatL0MHappySadcOj6UpDown123");
             mockConfiguration.Setup(x => x.GetSection(It.IsAny<string>())).Returns(new Mock<IConfigurationSection>().Object);
-            mockConfiguration.Setup(x => x.GetSection("Key")).Returns(mockConfigurationSection.Object);
+            mockConfiguration.Setup(x => x.GetSection("Jwt")).Returns(mockConfigurationSection.Object);
 
             // Act
             var response = await _sut.AuthenticateUserAsync(data);

@@ -80,13 +80,15 @@ namespace Clay.SmartDoor.Test.Integration.Services
             var user = TestDataGenerator.BasicUser;
 
             _mockUserManager.Setup(x => x.FindByIdAsync(userId)).ReturnsAsync(user);
+            _mockUserManager.Setup(x => x.GetClaimsAsync(user)).ReturnsAsync(new List<Claim> { new Claim(ClaimTypes.Name, "Permission"), });
+
 
             // Act
             var response = await _sut.GetUserPermissionsAsync(userId);
 
             // Assert
             response.StatusCode.ShouldBe((int)HttpStatusCode.OK);
-            response.Succeeded.ShouldBe(false);
+            response.Succeeded.ShouldBe(true);
         }
 
         [Fact]
@@ -120,7 +122,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
             // Assert
             response.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);
             response.Succeeded.ShouldBe(false);
-            response.Message.ShouldBe(Constants.Generic_Operation_Failed_Message);
+            response.Message.ShouldBe(Constants.Generic_Failure_Message);
         }
 
         [Fact]

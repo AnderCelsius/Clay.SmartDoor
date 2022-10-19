@@ -15,9 +15,14 @@ namespace Clay.SmartDoor.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<AccessGroup?> GetAccessGroupsAsync(string groupName)
+        public async Task<AccessGroup?> GetAccessGroupByNameAsync(string groupName)
         {
             return await _context.AccessGroups.AsNoTracking().SingleOrDefaultAsync(a => a.Name == groupName);
+        }
+
+        public async Task<AccessGroup?> GetAccessGroupByIdAsync(string id)
+        {
+            return await _context.AccessGroups.SingleOrDefaultAsync(a => a.Id == id);
         }
 
         public IQueryable<AccessGroup> GetAccessGroupsByActiveStatusAsync(bool isActive)

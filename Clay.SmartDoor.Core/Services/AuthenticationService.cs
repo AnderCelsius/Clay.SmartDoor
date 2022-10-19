@@ -98,7 +98,9 @@ namespace Clay.SmartDoor.Core.Services
                 new Claim(ClaimTypes.Surname, user.LastName),
             };
 
-            var key = Encoding.UTF8.GetBytes(_configuration.GetValue<string>("Key"));
+            var secret = _configuration.GetSection("Jwt").GetSection("key").Value;
+
+            var key = Encoding.UTF8.GetBytes(secret);
 
             //Gets the roles of the logged in user and adds it to Claims
             var roles = await _userManager.GetRolesAsync(user);
@@ -121,8 +123,8 @@ namespace Clay.SmartDoor.Core.Services
             var signingKey = new SymmetricSecurityKey(key);
 
             var token = new JwtSecurityToken
-            (audience: _configuration.GetValue<string>("Audience"),
-             issuer: _configuration.GetValue<string>("Issuer"),
+            (audience: _configuration["Jwt:Audience"],
+             issuer: _configuration["Jwt:Issuer"],
              claims: authClaims,
              expires: DateTime.Now.AddMinutes(2),
              signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256));
