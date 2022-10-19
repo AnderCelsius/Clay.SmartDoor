@@ -1,7 +1,7 @@
 ﻿using Clay.SmartDoor.Core.DTOs.Doors;
 using FluentValidation;
 
-namespace Clay.SmartDoor.Core.Models.Validators
+namespace Clay.SmartDoor.Core.Models.Validators.DoorValidators
 {
     public class CreateDoorValidator : AbstractValidator<CreateDoorRecord>
     {

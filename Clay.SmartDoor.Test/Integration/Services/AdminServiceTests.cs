@@ -118,7 +118,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
                 LastName = TestDataGenerator.BasicUser.LastName,
                 Email = TestDataGenerator.BasicUser.Email,
                 Password = "Password@123",
-                GroupId = TestDataGenerator.Default_AccessGroup
+                AccessGroupId = TestDataGenerator.Default_AccessGroup
 
             };
 
@@ -143,7 +143,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
                 LastName = TestDataGenerator.BasicUser.LastName,
                 Email = TestDataGenerator.BasicUser.Email,
                 Password = "Password@123",
-                GroupId = TestDataGenerator.Default_AccessGroup
+                AccessGroupId = TestDataGenerator.Default_AccessGroup
 
             };
 
@@ -173,7 +173,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
                 LastName = TestDataGenerator.BasicUser.LastName,
                 Email = TestDataGenerator.BasicUser.Email,
                 Password = "Password@123",
-                GroupId = TestDataGenerator.Default_AccessGroup
+                AccessGroupId = TestDataGenerator.Default_AccessGroup
 
             };
 

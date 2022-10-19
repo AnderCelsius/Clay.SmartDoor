@@ -99,7 +99,7 @@ namespace Clay.SmartDoor.Core.Services
                     Email = requestModel.Email,
                     UserName = requestModel.Email,
                     IsActive = true,
-                    AccessGroupId = requestModel.GroupId,
+                    AccessGroupId = requestModel.AccessGroupId,
                     CreatedDate = DateTime.Now,
                     LastModified = DateTime.Now,
                     CreatedBy = actionBy,
