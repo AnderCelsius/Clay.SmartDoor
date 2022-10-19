@@ -2,7 +2,7 @@ using Clay.SmartDoor.Api.Extentions;
 using Clay.SmartDoor.Core;
 using Clay.SmartDoor.Infrastructure;
 using Serilog;
-using System.Text.Json.Serialization;
+using Microsoft.Extensions.DependencyInjection;
 
 // Add Serilog setup
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
@@ -22,7 +22,8 @@ try
     // Add services to the container.
 
     builder.Services.AddControllers()
-            .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+        .AddNewtonsoftJson(op => op.SerializerSettings
+                    .ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
     builder.Services.AddSeriLog();
     builder.Services.AddSmartDoorCors();

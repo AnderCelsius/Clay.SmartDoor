@@ -116,13 +116,13 @@ namespace Clay.SmartDoor.Infrastructure.Data
             IsActive = true,
             CreatedAt = DateTime.Now,
             CreatedBy = "22eef6fa-2843-4516-a410-f7518703499a",
-            LastModified = DateTime.Now,
+            LastModified = DateTime.Now
         };
 
         private static AccessGroup OpenAccessGroup = new()
         {
             Id = Default_AccessGroup,
-            Name = "Oepn Group",
+            Name = "Open Group",
             IsActive = true,
             CreatedAt = DateTime.Now,
             CreatedBy = "22eef6fa-2843-4516-a410-f7518703499a",

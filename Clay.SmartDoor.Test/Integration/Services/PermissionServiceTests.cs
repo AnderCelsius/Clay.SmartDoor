@@ -70,7 +70,6 @@ namespace Clay.SmartDoor.Test.Integration.Services
             response.Message.ShouldBe(Constants.Generic_Operation_Failed_Message);
         }
 
-
         [Fact]
         public async Task GetUserPermissionsAsync_ShouldOkResponse_WhenRoleExists()
         {
@@ -143,12 +142,12 @@ namespace Clay.SmartDoor.Test.Integration.Services
 
             }
 
-            PermissionsDto permissionsDto = new()
+            RolePermissionsDto permissionsDto = new()
             {
                 RoleId = roleId,
-                RoleClaims = new List<RoleClaimDto>()
+                RoleClaims = new List<ClaimDto>()
                 {
-                    new RoleClaimDto(){Type = "Permission", Value = "Test", Selected = true}
+                    new ClaimDto(){Type = "Permission", Value = "Test", Selected = true}
                 }
 
             };
@@ -161,5 +160,42 @@ namespace Clay.SmartDoor.Test.Integration.Services
             response.Succeeded.ShouldBe(true);
             response.Message.ShouldBe(Constants.Generic_Success_Message);
         }
+
+        [Fact]
+        public async Task UpdateUserPermissionsAsync_ShouldOkResponse_WhenUpdateSucceeds()
+        {
+            // Arrange
+
+            var user = TestDataGenerator.BasicUser;
+            var userId = user.Id;
+            var claims = new List<Claim> { new Claim(ClaimTypes.Name, "Permission") };
+
+            _mockUserManager.Setup(x => x.FindByIdAsync(userId)).ReturnsAsync(user);
+            _mockUserManager.Setup(x => x.GetClaimsAsync(user)).ReturnsAsync(claims);
+            foreach (var claim in claims)
+            {
+                _mockUserManager.Setup(x => x.RemoveClaimAsync(user, claim));
+
+            }
+
+            UserPermissions permissionsDto = new()
+            {
+                UserId = userId,
+                Claims = new List<ClaimDto>()
+                {
+                    new ClaimDto(){Type = "Permission", Value = "Test", Selected = true}
+                }
+
+            };
+
+            // Act
+            var response = await _sut.UpdateUserPermissionsAsync(permissionsDto);
+
+            // Assert
+            response.StatusCode.ShouldBe((int)HttpStatusCode.OK);
+            response.Succeeded.ShouldBe(true);
+            response.Message.ShouldBe(Constants.Generic_Success_Message);
+        }
+
     }
 }

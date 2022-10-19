@@ -31,7 +31,7 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="403">When caller does not belong to the required group to create door</response>
         [Route("add")]
         [HttpPost]
-        [Authorize(Policy = Permissions.Access.Create)]
+        [Authorize(Policy = "Access.Create")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -79,6 +79,22 @@ namespace Clay.SmartDoor.Api.Controllers
         public async Task<ActionResult<ApiResponse<IEnumerable<DoorDetails>>>> Get()
         {
             var result = await _doorService.GetDoorsAsync();
+            return StatusCode(result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Retrieves the details of all doors.
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200">When the API call completes</response>
+        /// <response code="401">when caller is not calling this enpoind with the right bearer token</response> 
+        [Route("get-all/{doorId}")]
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiResponse<DoorDetails>>> Get(string doorId)
+        {
+            var result = await _doorService.GetDoorByIdAsync(doorId);
             return StatusCode(result.StatusCode, result);
         }
 

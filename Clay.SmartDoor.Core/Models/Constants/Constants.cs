@@ -9,7 +9,8 @@
         public const string Generic_Not_Found_Message = "Not Found.";
         public const string Generic_Save_Success_Message = "Changes persisted to database.";
         public const string Generic_Fail_Already_Exist_Message = "Operation failed. Item already exist.";
-        public const string Generic_Fail_User_Already_Exist_Message = "Operation failed. User already exist in group.";
+        public const string Generic_Fail_User_Already_Exist_Message = "Operation failed. User already belongs to group.";
+        public const string Generic_Fail_User_Does_Not_Belong_Message = "Operation failed. User does not belong to group.";
         public const string Generic_Fail_Does_Not_Exist_Message = "Operation failed. Item does not exist in group.";
         public const string Generic_Save_Fail_Message = "Failed to save.";
         public const string Generic_Activity_Logged_Message = "Activity logged.";
@@ -34,6 +35,7 @@
         public const string Failed_To_Create = "Failed to create";
         public const string Ok_Result = "Completed Successful";
         public const string User_Successfully_Added_To_Group = "User Successfully Added To Group.";
+        public const string User_Group_Update_Success = "User Group updated Successfully.";
     }
 
     public class AuthenticationMessage
@@ -49,6 +51,7 @@
     public class DoorMessage
     {
         public const string Not_Found = "Door does not exist in record.";
+        public const string Door_Create_Fail_Exist_Because_Found = "A door with that name tag already exist.";
         public const string Add_to_Group_Success = "Door successfully added to group.";
         public const string Add_to_Group_Fail = "Failed to add to group.";
     }

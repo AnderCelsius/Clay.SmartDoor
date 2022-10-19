@@ -115,16 +115,16 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="401">If jwt token provided is invalid.</response>
         /// <response code="403">If caller does not have the permission to create user.</response>
         [HttpPost]
-        [Route("add-user-to-access-group")]
+        [Route("update-user-access-group")]
         [Authorize(Policy = "Access.Grant")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult> AddUserToAccessGroup(
+        public async Task<ActionResult> UpdateUserAccessGroup(
             [ModelBinder(BinderType = typeof(AuthenticatedUserIdBinder))] string userId,
-            NewUserToAccessGroup requestModel)
+            UpdateUserAccessGroup requestModel)
         {
-            var result = await _adminService.AddUserToAccessGroupAsync(requestModel, userId);
+            var result = await _adminService.UpdateUserAccessGroup(requestModel, userId);
             return StatusCode(result.StatusCode, result);
         }
 

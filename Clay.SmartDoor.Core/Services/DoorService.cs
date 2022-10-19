@@ -29,6 +29,15 @@ namespace Clay.SmartDoor.Core.Services
                 _logger.Information(Constants.Generic_Begin_Operation_Message);
                 var door = model.ToDoor(DateTime.Now, DateTime.Now, creatorId);
 
+                var doors = _unitOfWork.Doors.GetAll();
+
+                bool exists = doors.Where(x => x.NameTag == model.NameTag).Any();
+
+                if (exists)
+                {
+                    return ApiResponse<string>.Fail(Constants.Generic_Fail_Already_Exist_Message, 400);
+                }
+
                 // Create door
                 await _unitOfWork.Doors.AddAsync(door);
                 _logger.Information(ActivityDescriptions.Door_Created);
@@ -101,6 +110,27 @@ namespace Clay.SmartDoor.Core.Services
             {
                 _logger.Error(ex, ex.Message);
                 return ApiResponse<string>.Fail(ApiResponseMesage.Failed_To_Create);
+            }
+        }
+
+        public async Task<ApiResponse<DoorDetails>> GetDoorByIdAsync(string doorId)
+        {
+            try
+            {
+                _logger.Information(Constants.Generic_Begin_Operation_Message);
+                var door = await _unitOfWork.Doors.GetDoorAsync(doorId);
+
+                if(door == null)
+                {
+                    return ApiResponse<DoorDetails>.Fail(DoorMessage.Not_Found);
+                }
+                _logger.Information(Constants.Generic_Success_Message);
+                return ApiResponse<DoorDetails>.Success(ApiResponseMesage.Ok_Result, door.ToDoorDetails());
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, ex.Message);
+                return ApiResponse<DoorDetails>.Fail(Constants.Generic_Operation_Failed_Message, 500);
             }
         }
 

@@ -126,7 +126,7 @@ namespace Clay.SmartDoor.Core.Services
             (audience: _configuration["Jwt:Audience"],
              issuer: _configuration["Jwt:Issuer"],
              claims: authClaims,
-             expires: DateTime.Now.AddMinutes(2),
+             expires: DateTime.Now.AddMinutes(20),
              signingCredentials: new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256));
 
             return new JwtSecurityTokenHandler().WriteToken(token);

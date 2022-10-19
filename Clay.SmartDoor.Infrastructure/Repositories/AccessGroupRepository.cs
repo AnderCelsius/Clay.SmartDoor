@@ -27,7 +27,10 @@ namespace Clay.SmartDoor.Infrastructure.Repositories
 
         public IQueryable<AccessGroup> GetAccessGroupsByActiveStatusAsync(bool isActive)
         {
-            return _context.AccessGroups.AsNoTracking().Where(a => a.IsActive == isActive);
+            return _context.AccessGroups.AsNoTracking()
+                .Where(a => a.IsActive == isActive)
+                .Include(a => a.Users)
+                .Include(a => a.DoorAssignment);
         }
     }
 }

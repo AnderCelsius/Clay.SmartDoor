@@ -21,7 +21,7 @@ namespace Clay.SmartDoor.Api.Controllers
 
         [Authorize(Roles = "SuperAdmin")]
         [HttpGet("role-perimissions")]
-        public async Task<ActionResult<ApiResponse<PermissionsDto>>> GetPermissionsByRole(string roleId)
+        public async Task<ActionResult<ApiResponse<RolePermissionsDto>>> GetPermissionsByRole(string roleId)
         {
             var result = await _permissionService.GetAsync(roleId);
             return StatusCode(result.StatusCode, result);
@@ -29,7 +29,7 @@ namespace Clay.SmartDoor.Api.Controllers
 
         [Authorize(Roles = "SuperAdmin")]
         [HttpGet("user-permission")]
-        public async Task<ActionResult<ApiResponse<PermissionsDto>>> GetPermissionsByUser(string userId)
+        public async Task<ActionResult<ApiResponse<RolePermissionsDto>>> GetPermissionsByUser(string userId)
         {
             var result = await _permissionService.GetUserPermissionsAsync(userId);
             return StatusCode(result.StatusCode, result);
@@ -38,7 +38,7 @@ namespace Clay.SmartDoor.Api.Controllers
         [Authorize(Roles = "SuperAdmin")]
         [HttpPost("update-role-permissions")]
         public async Task<ActionResult<ApiResponse<string>>> UpdatePermissionsForRole(
-            [FromBody] PermissionsDto payload)
+            [FromBody] RolePermissionsDto payload)
         {
             var result = await _permissionService.UpdatePermissionsForRoleAsync(payload);
             return StatusCode(result.StatusCode, result);

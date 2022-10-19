@@ -154,8 +154,16 @@ namespace Clay.SmartDoor.Api.Extentions
                     policy.RequireAuthenticatedUser();
                     policy.RequireClaim("Permission", Permissions.Access.Grant);
                 });
-                options.AddPolicy("Access.Delete",
-                    policy => policy.RequireClaim("Permission", Permissions.Access.Revoke));
+                options.AddPolicy("Access.View", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("Permission", Permissions.Access.View);
+                });
+                options.AddPolicy("Access.Revoke", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("Permission", Permissions.Access.Revoke);
+                });
                 options.AddPolicy("User.Create",
                     policy => policy.RequireClaim("Permission", Permissions.User.Create));
             });

@@ -12,7 +12,8 @@
         {
             Access.Create,
             Access.Grant,
-            Access.Revoke
+            Access.Revoke,
+            Access.View,
         };
 
         public static class User
@@ -26,6 +27,7 @@
             public const string Create = "Permissions.Access.Create";
             public const string Grant = "Permissions.Access.Grant";
             public const string Revoke = "Permissions.Access.Revoke";
+            public const string View = "Permissions.Access.View";
         }
     }
 }

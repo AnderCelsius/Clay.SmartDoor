@@ -95,7 +95,7 @@ namespace Clay.SmartDoor.Core.Services
 
                 if (doorExistInGroup != null)
                 {
-                    return ApiResponse<string>.Fail(Constants.Generic_Fail_Already_Exist_Message, 400);
+                    return ApiResponse<string>.Fail(DoorMessage.Door_Create_Fail_Exist_Because_Found, 400);
                 }
 
                 var doorAssignment = new DoorAssignment
@@ -189,12 +189,18 @@ namespace Clay.SmartDoor.Core.Services
                 return ApiResponse<string>.Fail(Constants.Generic_Operation_Failed_Message, 400);
             }
         }
-        public async Task<ApiResponse<string>> AddUserToAccessGroupAsync(NewUserToAccessGroup requestModel, string actionBy)
+        public async Task<ApiResponse<string>> UpdateUserAccessGroup(UpdateUserAccessGroup requestModel, string actionBy)
         {
             try
             {
-                var accessGroup = await _unitOfWork.AccessGroups.GetAccessGroupByIdAsync(requestModel.AccessGroupId);
-                if (accessGroup == null)
+                var oldAccessGroup = await _unitOfWork.AccessGroups.GetAccessGroupByIdAsync(requestModel.OldAccessGroupId);
+                if (oldAccessGroup == null)
+                {
+                    return ApiResponse<string>.Fail(Constants.Generic_Not_Found_Message);
+                }
+
+                var newAccessGroup = await _unitOfWork.AccessGroups.GetAccessGroupByIdAsync(requestModel.NewAccessGroupId);
+                if (newAccessGroup == null)
                 {
                     return ApiResponse<string>.Fail(Constants.Generic_Not_Found_Message);
                 }
@@ -207,29 +213,33 @@ namespace Clay.SmartDoor.Core.Services
                 }
 
                 bool userExistInGroup = false;
-                foreach(var user in accessGroup.Users)
+                foreach(var user in oldAccessGroup.Users)
                 {
                     if(user.Id == foundUser.Id)
                     {
                         userExistInGroup = true;
+                        oldAccessGroup.Users.Remove(user);
                         break;
                     }
                 }
 
-                if (userExistInGroup)
+                if (!userExistInGroup)
                 {
-                    return ApiResponse<string>.Fail(Constants.Generic_Fail_User_Already_Exist_Message, 400);
+                    return ApiResponse<string>.Fail(Constants.Generic_Fail_User_Does_Not_Belong_Message, 400);
                 }
 
-                accessGroup.Users.Add(foundUser);
+                
 
-                _unitOfWork.AccessGroups.Update(accessGroup);
+                newAccessGroup.Users.Add(foundUser);
+
+                _unitOfWork.AccessGroups.Update(oldAccessGroup);
+                _unitOfWork.AccessGroups.Update(newAccessGroup);
                 var saveResult = await _unitOfWork.SaveAsync();
 
                 _logger.Information(saveResult > 0 ? Constants.Generic_Save_Success_Message
                    : Constants.Generic_Failure_Message);
 
-                return ApiResponse<string>.Success(ApiResponseMesage.User_Successfully_Added_To_Group, ApiResponseMesage.User_Successfully_Added_To_Group);
+                return ApiResponse<string>.Success(ApiResponseMesage.User_Group_Update_Success, ApiResponseMesage.User_Group_Update_Success);
             }
             catch (Exception ex)
             {
@@ -237,25 +247,26 @@ namespace Clay.SmartDoor.Core.Services
                 return ApiResponse<string>.Fail(Constants.Generic_Operation_Failed_Message, 400);
             }
         }
-        public async Task<ApiResponse<IEnumerable<AccessGroup>>> GetAllAccessGroupsAsync(GroupState groupState)
+        public async Task<ApiResponse<IEnumerable<AccessGroupResponse>>> GetAllAccessGroupsAsync(GroupState groupState)
         {
             try
             {
-                IQueryable<AccessGroup> accessGroups;
+                IQueryable<AccessGroup> accessGroupsQuery;
 
                 if (groupState == GroupState.All)
                 {
-                    accessGroups = _unitOfWork.AccessGroups.GetAll();
+                    accessGroupsQuery = _unitOfWork.AccessGroups.GetAll();
                 }
                 else
                 {
                     var isActive = groupState == GroupState.Active;
-                    accessGroups = _unitOfWork.AccessGroups.GetAccessGroupsByActiveStatusAsync(isActive);
+                    accessGroupsQuery = _unitOfWork.AccessGroups.GetAccessGroupsByActiveStatusAsync(isActive);
                 }
 
-                return new ApiResponse<IEnumerable<AccessGroup>>
+                var accessGroup = await accessGroupsQuery.ToListAsyncSafe();
+                return new ApiResponse<IEnumerable<AccessGroupResponse>>
                 {
-                    Data = await accessGroups.ToListAsyncSafe(),
+                    Data = accessGroup.Select(x => x.ToAccessGroupResponse()).ToList(),
                     Succeeded = true,
                     StatusCode = 200,
                     Message = ApiResponseMesage.Ok_Result
@@ -265,7 +276,7 @@ namespace Clay.SmartDoor.Core.Services
             catch (Exception ex)
             {
                 _logger.Error(ex, ex.Message);
-                return ApiResponse<IEnumerable<AccessGroup>>.Fail(Constants.Generic_Operation_Failed_Message, 400);
+                return ApiResponse<IEnumerable<AccessGroupResponse>>.Fail(Constants.Generic_Operation_Failed_Message, 400);
             }
         }
 
