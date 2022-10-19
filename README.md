@@ -9,13 +9,9 @@ The application has 3 Roles
 ### 2. Admin
 ### 3. Basic
 
-#### Super Admin
-Handles creation of permissions and assigning permissions to users. 
-#### Admin
-Can perform certain administrative operations (e.g. Add User) based on the permissions granted. Can have access to Secure doors if he/she belongs to the
-Secure group.
-#### Basic
-Can access the main door and any other door that falls in the Genral group.
+#### Super Admin: Handles creation of permissions and assigning permissions to users. 
+#### Admin: Can perform certain administrative operations (e.g. Add User) based on the permissions granted. Can have access to Secure doors if he/she belongs to the Secure group.
+#### Basic: Can access the main door and any other door that falls in the Genral group.
 
 
 ## Architecture
