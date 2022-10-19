@@ -5,6 +5,7 @@ using Clay.SmartDoor.Core.Interfaces.CoreServices;
 using Clay.SmartDoor.Core.Models;
 using Clay.SmartDoor.Core.Models.Constants;
 using Microsoft.AspNetCore.Identity;
+using Serilog;
 
 namespace Clay.SmartDoor.Core.Services
 {
@@ -12,96 +13,116 @@ namespace Clay.SmartDoor.Core.Services
     {
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<AppUser> _userManager;
+        private readonly ILogger _logger;
+
 
         public PermissionService(
+            ILogger logger,
             RoleManager<IdentityRole> roleManager,
             UserManager<AppUser> userManager)
         {
+            _logger = logger;
             _roleManager = roleManager;
             _userManager = userManager;
         }
        
         public async Task<ApiResponse<PermissionsDto>> GetAsync(string roleId)
         {
-            var allPermissions = new List<RoleClaimDto>();
-            var accessPermissions = new List<RoleClaimDto>();
-            var userPermissions = new List<RoleClaimDto>();
-
-            accessPermissions.GetPermission(typeof(Permissions.Access));
-            userPermissions.GetPermission(typeof(Permissions.User));
-
-            allPermissions.AddRange(accessPermissions);
-            allPermissions.AddRange(userPermissions);
-
-            var role = await _roleManager.FindByIdAsync(roleId);
-
-            if(role == null)
+            try
             {
-                return ApiResponse<PermissionsDto>.Fail(Constants.Generic_Not_Found_Message);
-            }
+                var allPermissions = new List<RoleClaimDto>();
+                var accessPermissions = new List<RoleClaimDto>();
+                var userPermissions = new List<RoleClaimDto>();
 
-            var claims = await _roleManager.GetClaimsAsync(role);
+                accessPermissions.GetPermission(typeof(Permissions.Access));
+                userPermissions.GetPermission(typeof(Permissions.User));
 
-            var allClaimValues = allPermissions.Select(p => p.Value).ToList();
-            var roleClaimValues = claims.Select(c => c.Value).ToList();
-            var authorizedClaims = allClaimValues.Intersect(roleClaimValues).ToList();
+                allPermissions.AddRange(accessPermissions);
+                allPermissions.AddRange(userPermissions);
 
-            foreach(var permission in allPermissions)
-            {
-                if(authorizedClaims.Any(ac => ac == permission.Value))
+                var role = await _roleManager.FindByIdAsync(roleId);
+
+                if (role == null)
                 {
-                    permission.Selected = true;
+                    return ApiResponse<PermissionsDto>.Fail(Constants.Generic_Not_Found_Message);
                 }
-            }
 
-            return new ApiResponse<PermissionsDto>()
-            {
-                Data = new PermissionsDto
+                var claims = await _roleManager.GetClaimsAsync(role);
+
+                var allClaimValues = allPermissions.Select(p => p.Value).ToList();
+                var roleClaimValues = claims.Select(c => c.Value).ToList();
+                var authorizedClaims = allClaimValues.Intersect(roleClaimValues).ToList();
+
+                foreach (var permission in allPermissions)
                 {
-                    RoleId = roleId,
-                    RoleClaims = allPermissions
-                },
-                StatusCode = 200,
-                Succeeded = true
-            };
+                    if (authorizedClaims.Any(ac => ac == permission.Value))
+                    {
+                        permission.Selected = true;
+                    }
+                }
+
+                return new ApiResponse<PermissionsDto>()
+                {
+                    Data = new PermissionsDto
+                    {
+                        RoleId = roleId,
+                        RoleClaims = allPermissions
+                    },
+                    StatusCode = 200,
+                    Succeeded = true
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, ex.Message);
+                return ApiResponse<PermissionsDto>.Fail(Constants.Generic_Operation_Failed_Message, 400);
+            }
         }
 
         public async Task<ApiResponse<PermissionsDto>> GetUserPermissionsAsync(string userId)
         {
-            var allPermissions = new List<RoleClaimDto>();
-
-            allPermissions.GetPermission(typeof(Permissions.Access));
-            var user = await _userManager.FindByIdAsync(userId);
-
-            if (user == null)
+            try
             {
-                return ApiResponse<PermissionsDto>.Fail(Constants.Generic_Not_Found_Message);
-            }
+                var allPermissions = new List<RoleClaimDto>();
 
-            var claims = await _userManager.GetClaimsAsync(user);
+                allPermissions.GetPermission(typeof(Permissions.Access));
+                var user = await _userManager.FindByIdAsync(userId);
 
-            var allClaimValues = allPermissions.Select(p => p.Value).ToList();
-            var roleClaimValues = claims.Select(c => c.Value).ToList();
-            var authorizedClaims = allClaimValues.Intersect(roleClaimValues).ToList();
-
-            foreach (var permission in allPermissions)
-            {
-                if (authorizedClaims.Any(ac => ac == permission.Value))
+                if (user == null)
                 {
-                    permission.Selected = true;
+                    return ApiResponse<PermissionsDto>.Fail(Constants.Generic_Not_Found_Message);
                 }
-            }
 
-            return new ApiResponse<PermissionsDto>()
-            {
-                Data = new PermissionsDto
+                var claims = await _userManager.GetClaimsAsync(user);
+
+                var allClaimValues = allPermissions.Select(p => p.Value).ToList();
+                var roleClaimValues = claims.Select(c => c.Value).ToList();
+                var authorizedClaims = allClaimValues.Intersect(roleClaimValues).ToList();
+
+                foreach (var permission in allPermissions)
                 {
-                    RoleId = userId,
-                    RoleClaims = allPermissions
-                },
-                StatusCode = 200,
-                Succeeded = true
-            };
+                    if (authorizedClaims.Any(ac => ac == permission.Value))
+                    {
+                        permission.Selected = true;
+                    }
+                }
+
+                return new ApiResponse<PermissionsDto>()
+                {
+                    Data = new PermissionsDto
+                    {
+                        RoleId = userId,
+                        RoleClaims = allPermissions
+                    },
+                    StatusCode = 200,
+                    Succeeded = true
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, ex.Message);
+                return ApiResponse<PermissionsDto>.Fail(Constants.Generic_Failure_Message, 400);
+            }
         }
 
         public async Task<ApiResponse<string>> UpdatePermissionsForRoleAsync(PermissionsDto model)
@@ -109,6 +130,12 @@ namespace Clay.SmartDoor.Core.Services
             try
             {
                 var role = await _roleManager.FindByIdAsync(model.RoleId);
+
+                if(role == null)
+                {
+                    return ApiResponse<string>.Fail(Constants.Generic_Not_Found_Message);
+                }
+
                 var claims = await _roleManager.GetClaimsAsync(role);
 
                 foreach (var claim in claims)
@@ -127,10 +154,10 @@ namespace Clay.SmartDoor.Core.Services
 
                 return ApiResponse<string>.Success(Constants.Generic_Success_Message, model.RoleId);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                return ApiResponse<string>.Fail(Constants.Generic_Failure_Message);
+                _logger.Error(ex, ex.Message);
+                return ApiResponse<string>.Fail(Constants.Generic_Failure_Message, 400);
             }
         }
     }
