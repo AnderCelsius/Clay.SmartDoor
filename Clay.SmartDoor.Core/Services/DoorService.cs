@@ -139,6 +139,20 @@ namespace Clay.SmartDoor.Core.Services
 
                 if (assignedDoor == null)
                 {
+                    var failedActivityLog = new ActivityLog
+                    {
+                        Time = DateTime.Now,
+                        Description = ActivityDescriptions.Access_Denied,
+                        ActionBy = userId,
+                        DoorId = model.DoorId,
+                        Building = door.Building,
+                        Floor = door.Floor,
+                        DoorTag = door.NameTag
+                    };
+
+                    await _unitOfWork.ActivityLogs.AddAsync(failedActivityLog);
+                    await _unitOfWork.SaveAsync();
+
                     _logger.Information(AuthenticationMessage.Forbidden);
                     return ApiResponse<string>.Fail(AuthenticationMessage.Forbidden, 403);
                 }

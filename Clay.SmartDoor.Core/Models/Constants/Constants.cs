@@ -23,6 +23,8 @@
         public const string Group_Created = "New group added.";
         public const string Door_Added_To_Group = "Door added to group.";
         public const string Door_Removed_From_Group = "Door added to group.";
+        public const string Access_Denied = "Access Denied.";
+        public const string AccessGoup_Added = "Access Group Added.";
     }
 
     public class ApiResponseMesage

@@ -38,6 +38,7 @@ namespace Clay.SmartDoor.Core.Services
         {
             try
             {
+                _logger.Information(Constants.Generic_Begin_Operation_Message);
                 var groupExist = await _unitOfWork.AccessGroups.GetAccessGroupsAsync(groupName);
                 if (groupExist != null)
                 {
@@ -61,10 +62,13 @@ namespace Clay.SmartDoor.Core.Services
                 };
 
                 await _unitOfWork.AccessGroups.AddAsync(accessGroup);
+                _logger.Information(ActivityDescriptions.AccessGoup_Added);
+
                 await _unitOfWork.ActivityLogs.AddAsync(activilog);
+                _logger.Information(ActivityDescriptions.Activity_Logged);
+
 
                 var saveResult = await _unitOfWork.SaveAsync();
-
 
                 _logger.Information(saveResult > 0 ? Constants.Generic_Save_Success_Message
                     : Constants.Generic_Failure_Message);
@@ -122,7 +126,7 @@ namespace Clay.SmartDoor.Core.Services
                 scope.Complete();
 
                 return ApiResponse<string>.Success(
-                    ApiResponseMesage.Created_Successfully, 
+                    ApiResponseMesage.Created_Successfully,
                     ApiResponseMesage.Created_Successfully,
                     201);
             }
@@ -139,7 +143,7 @@ namespace Clay.SmartDoor.Core.Services
             {
                 IQueryable<AccessGroup> accessGroups;
 
-                if(groupState == GroupState.All)
+                if (groupState == GroupState.All)
                 {
                     accessGroups = _unitOfWork.AccessGroups.GetAll();
                 }
@@ -169,18 +173,17 @@ namespace Clay.SmartDoor.Core.Services
         {
             try
             {
-                var door = await _unitOfWork.Doors.GetAsync(d => d.Id == requestModel.DoorId);
-                if(door == null)
+                var door = await _unitOfWork.Doors.GetDoorAsync(requestModel.DoorId);
+                if (door == null)
                 {
                     return ApiResponse<string>.Fail(DoorMessage.Not_Found);
                 }
 
-                var doorExistInGroup = await _unitOfWork.DoorAssignments.GetAsync(
-                    d => d.DoorId == requestModel.DoorId && d.AccessGroupId == requestModel.AccessGroupId && d.Assigned);
+                var doorExistInGroup = await _unitOfWork.DoorAssignments.GetDoorAssignmentAsync(requestModel.DoorId, requestModel.AccessGroupId);
 
-                if(doorExistInGroup != null)
+                if (doorExistInGroup != null)
                 {
-                    return ApiResponse<string>.Fail(Constants.Generic_Fail_Already_Exist_Message);
+                    return ApiResponse<string>.Fail(Constants.Generic_Fail_Already_Exist_Message, 400);
                 }
 
                 var doorAssignment = new DoorAssignment
@@ -212,12 +215,12 @@ namespace Clay.SmartDoor.Core.Services
                 _logger.Information(saveResult > 0 ? Constants.Generic_Save_Success_Message
                    : Constants.Generic_Failure_Message);
 
-                return ApiResponse<string>.Success(ApiResponseMesage.Created_Successfully, ApiResponseMesage.Ok_Result);
+                return ApiResponse<string>.Success(ApiResponseMesage.Created_Successfully, ApiResponseMesage.Created_Successfully, 201);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, ex.Message);
-                return ApiResponse<string>.Fail(Constants.Generic_Operation_Failed_Message);
+                return ApiResponse<string>.Fail(Constants.Generic_Operation_Failed_Message, 400);
             }
         }
 
@@ -238,7 +241,7 @@ namespace Clay.SmartDoor.Core.Services
             catch (Exception ex)
             {
                 _logger.Error(ex, ex.Message);
-                return ApiResponse<IEnumerable<ActivityLogDetails>>.Fail(Constants.Generic_Operation_Failed_Message);
+                return ApiResponse<IEnumerable<ActivityLogDetails>>.Fail(Constants.Generic_Operation_Failed_Message, 400);
             }
         }
 
@@ -246,18 +249,17 @@ namespace Clay.SmartDoor.Core.Services
         {
             try
             {
-                var door = await _unitOfWork.Doors.GetAsync(d => d.Id == requestModel.DoorId);
+                var door = await _unitOfWork.Doors.GetDoorAsync(requestModel.DoorId);
                 if (door == null)
                 {
                     return ApiResponse<string>.Fail(DoorMessage.Not_Found);
                 }
 
-                var assignedDoor = await _unitOfWork.DoorAssignments.GetAsync(
-                    d => d.DoorId == requestModel.DoorId && d.AccessGroupId == requestModel.AccessGroupId && d.Assigned);
+                var assignedDoor = await _unitOfWork.DoorAssignments.GetDoorAssignmentAsync(requestModel.DoorId, requestModel.AccessGroupId);
 
                 if (assignedDoor == null)
                 {
-                    return ApiResponse<string>.Fail(Constants.Generic_Fail_Does_Not_Exist_Message);
+                    return ApiResponse<string>.Fail(Constants.Generic_Fail_Does_Not_Exist_Message, 400);
                 }
 
                 assignedDoor.Assigned = false;
@@ -281,12 +283,12 @@ namespace Clay.SmartDoor.Core.Services
                 _logger.Information(saveResult > 0 ? Constants.Generic_Save_Success_Message
                    : Constants.Generic_Failure_Message);
 
-                return ApiResponse<string>.Success(ApiResponseMesage.Created_Successfully, ApiResponseMesage.Ok_Result);
+                return ApiResponse<string>.Success(ApiResponseMesage.Ok_Result, ApiResponseMesage.Ok_Result);
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, ex.Message);
-                return ApiResponse<string>.Fail(Constants.Generic_Operation_Failed_Message);
+                return ApiResponse<string>.Fail(Constants.Generic_Operation_Failed_Message, 400);
             }
         }
 
