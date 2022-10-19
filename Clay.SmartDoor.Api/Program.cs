@@ -2,33 +2,38 @@ using Clay.SmartDoor.Api.Extentions;
 using Clay.SmartDoor.Core;
 using Clay.SmartDoor.Infrastructure;
 using Serilog;
-using System.Text.Json.Serialization;
+using Microsoft.Extensions.DependencyInjection;
 
 // Add Serilog setup
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 var isDevelopment = environment == Environments.Development;
 
-IConfiguration config = ApiConfigurationExtentions.GetConfig(isDevelopment);
-LogSettings.SetUpSerilog(config);
+IConfiguration config;
 
 try
 {
     Log.Information("Application is starting...");
 
     var builder = WebApplication.CreateBuilder(args);
+    config = builder.Configuration;
+    LogSettings.SetUpSerilog(builder.Configuration);
+
 
     // Add services to the container.
 
     builder.Services.AddControllers()
-            .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
+        .AddNewtonsoftJson(op => op.SerializerSettings
+                    .ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
     builder.Services.AddSeriLog();
+    builder.Services.AddSmartDoorCors();
     builder.Services.AddSmartDoorPermissionPolicy();
     builder.Services.AddInfrastructureServices(config);
-    builder.Services.AddCoreServices();
     builder.Services.AddOpenApiDocumentation();
-    builder.Services.AddJwtAuthentication(config);
+
     builder.Services.AddSmartDoorIdentity();
+    builder.Services.AddJwtAuthentication(config);
+    builder.Services.AddCoreServices();
 
 
     var app = builder.Build();
@@ -43,6 +48,7 @@ try
     app.UseHttpsRedirection();
 
     app.UseOpenApiDocumentation();
+    app.UseCors("SamrtDoorpolicy");
     app.UseAuthentication();
     app.UseAuthorization();
 

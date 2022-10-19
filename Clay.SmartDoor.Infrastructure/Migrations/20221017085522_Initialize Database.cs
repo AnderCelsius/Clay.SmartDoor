@@ -6,11 +6,31 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Clay.SmartDoor.Infrastructure.Migrations
 {
-    public partial class InitializeDb : Migration
+    public partial class InitializeDatabase : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
+                name: "AccessGroups",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatorBy = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Date_Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Last_Modified_Date = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AccessGroups", x => x.Id);
+                })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
@@ -33,6 +53,29 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                name: "Doors",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Name_Tag = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Building = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Floor = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Creator_Id = table.Column<string>(type: "longtext", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
+                    Date_Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    Last_Modified = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Doors", x => x.Id);
+                })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                 name: "AspNetUsers",
                 columns: table => new
                 {
@@ -42,12 +85,13 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     LastName = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    StaffId = table.Column<long>(type: "bigint", maxLength: 100, nullable: false),
                     CreatedBy = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     IsActive = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     LastModified = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    AccessGroupId = table.Column<string>(type: "varchar(255)", nullable: false)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     UserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     NormalizedUserName = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true)
@@ -74,29 +118,40 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUsers_AccessGroups_AccessGroupId",
+                        column: x => x.AccessGroupId,
+                        principalTable: "AccessGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "Door",
+                name: "DoorAssignment",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Name_Tag = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                    DoorId = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Building = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
+                    AccessGroupId = table.Column<string>(type: "varchar(255)", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    Floor = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Creator_Id = table.Column<string>(type: "longtext", nullable: false)
+                    Assigned = table.Column<bool>(type: "tinyint(1)", nullable: false),
+                    CreatorBy = table.Column<string>(type: "longtext", nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Date_Created = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    Last_Modified = table.Column<DateTime>(type: "datetime(6)", nullable: false)
+                    Last_Modified_Date = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Door", x => x.Id);
+                    table.PrimaryKey("PK_DoorAssignment", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DoorAssignment_AccessGroups_AccessGroupId",
+                        column: x => x.AccessGroupId,
+                        principalTable: "AccessGroups",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -126,7 +181,7 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                name: "ActivityLog",
+                name: "ActivityLogs",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "varchar(255)", nullable: false)
@@ -147,9 +202,9 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ActivityLog", x => x.Id);
+                    table.PrimaryKey("PK_ActivityLogs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ActivityLog_AspNetUsers_ActionBy",
+                        name: "FK_ActivityLogs_AspNetUsers_ActionBy",
                         column: x => x.ActionBy,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
@@ -260,8 +315,14 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ActivityLog_ActionBy",
-                table: "ActivityLog",
+                name: "IX_AccessGroups_Name",
+                table: "AccessGroups",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ActivityLogs_ActionBy",
+                table: "ActivityLogs",
                 column: "ActionBy");
 
             migrationBuilder.CreateIndex(
@@ -296,21 +357,41 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_AccessGroupId",
+                table: "AspNetUsers",
+                column: "AccessGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_Email",
+                table: "AspNetUsers",
+                column: "Email");
+
+            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Door_Name_Tag",
-                table: "Door",
+                name: "IX_DoorAssignment_AccessGroupId",
+                table: "DoorAssignment",
+                column: "AccessGroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DoorAssignment_DoorId",
+                table: "DoorAssignment",
+                column: "DoorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Doors_Name_Tag",
+                table: "Doors",
                 column: "Name_Tag");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ActivityLog");
+                name: "ActivityLogs");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
@@ -328,13 +409,19 @@ namespace Clay.SmartDoor.Infrastructure.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Door");
+                name: "DoorAssignment");
+
+            migrationBuilder.DropTable(
+                name: "Doors");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "AccessGroups");
         }
     }
 }

@@ -55,6 +55,18 @@ namespace Clay.SmartDoor.Infrastructure.Repositories
             return query.AsNoTracking();
         }
 
+        public async Task<T?> GetAsync(Expression<Func<T, bool>> expression, List<string> includes = null!)
+        {
+            IQueryable<T> query = _dbSet;
+            if (includes != null)
+            {
+                foreach (var includeProperty in includes)
+                {
+                    query = query.Include(includeProperty);
+                }
+            }
+            return await query.AsNoTracking().FirstOrDefaultAsync(expression);
+        }
         public void Update(T entity)
         {
             _context.Attach(entity);

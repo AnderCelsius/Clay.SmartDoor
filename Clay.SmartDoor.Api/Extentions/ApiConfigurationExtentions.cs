@@ -1,8 +1,10 @@
 ﻿using Clay.SmartDoor.Api.Identity;
 using Clay.SmartDoor.Core.Entities;
+using Clay.SmartDoor.Core.Models;
 using Clay.SmartDoor.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -18,25 +20,6 @@ namespace Clay.SmartDoor.Api.Extentions
     /// </summary>
     public static class ApiConfigurationExtentions
     {
-        /// <summary>
-        /// Adds the JSON configuration provider to the builder
-        /// depending on the current environment.
-        /// </summary>
-        /// <param name="isDevelopment"></param>
-        /// <returns>An <seealso cref="IConfigurationRoot"/> with 
-        /// keys and values from the registered sources</returns>
-        public static IConfiguration GetConfig(bool isDevelopment)
-        {
-            return isDevelopment ? new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
-                .Build()
-            :
-            new ConfigurationBuilder()
-            .AddEnvironmentVariables()
-            .Build();
-        }
-
         /// <summary>
         /// Adds and configures the identity system for <seealso cref="AppUser"/>
         /// and <seealso cref="IdentityRole"/>. Then uses the IdentityBuilder to 
@@ -127,7 +110,7 @@ namespace Clay.SmartDoor.Api.Extentions
         /// <param name="services"></param>
         /// <param name="configuration"></param>
         public static void AddJwtAuthentication(
-            this IServiceCollection services, 
+            this IServiceCollection services,
             IConfiguration configuration)
         {
             var issuer = configuration["Jwt:Issuer"];
@@ -137,12 +120,12 @@ namespace Clay.SmartDoor.Api.Extentions
             services.AddAuthorization();
 
             services
-                .AddAuthentication( options =>
-                {
-                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
+                .AddAuthentication(options =>
+               {
+                   options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                   options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                   options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+               })
                 .AddJwtBearer(options =>
                 {
                     options.RequireHttpsMetadata = false;
@@ -161,9 +144,28 @@ namespace Clay.SmartDoor.Api.Extentions
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("Door.All", policy =>
-                    policy.RequireClaim("Permission", "Permissions.Door.All")
-                );
+                options.AddPolicy("Access.Create", policy =>
+                 {
+                     policy.RequireAuthenticatedUser();
+                     policy.RequireClaim("Permission", Permissions.Access.Create);
+                 });
+                options.AddPolicy("Access.Grant", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("Permission", Permissions.Access.Grant);
+                });
+                options.AddPolicy("Access.View", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("Permission", Permissions.Access.View);
+                });
+                options.AddPolicy("Access.Revoke", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("Permission", Permissions.Access.Revoke);
+                });
+                options.AddPolicy("User.Create",
+                    policy => policy.RequireClaim("Permission", Permissions.User.Create));
             });
 
             services.AddHttpContextAccessor();
@@ -202,9 +204,8 @@ namespace Clay.SmartDoor.Api.Extentions
             var userManager = services.GetRequiredService<UserManager<AppUser>>();
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
-            SmartDoorDataSeeder.SeedAsync(db, userManager, roleManager).GetAwaiter().GetResult(); ;
+            SmartDoorDataSeeder.SeedAsync(db, userManager, roleManager).GetAwaiter().GetResult();
         }
-
 
         /// <summary>
         /// registers <seealso cref="Serilog"/> for the project
@@ -214,5 +215,21 @@ namespace Clay.SmartDoor.Api.Extentions
         {
             services.AddSingleton(Log.Logger);
         }
+
+        public static void AddSmartDoorCors(this IServiceCollection services)
+        {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("SamrtDoorpolicy",
+                          policy =>
+                          {
+                              policy.WithOrigins("http://localhost:7114",
+                                                  "https://localhost:7114")
+                                                  .AllowAnyHeader()
+                                                  .AllowAnyMethod();
+                          });
+            });
+        }
+        
     }
 }

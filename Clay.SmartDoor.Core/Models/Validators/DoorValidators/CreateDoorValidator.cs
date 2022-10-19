@@ -1,7 +1,7 @@
-﻿using Clay.SmartDoor.Core.Dtos;
+﻿using Clay.SmartDoor.Core.DTOs.Doors;
 using FluentValidation;
 
-namespace Clay.SmartDoor.Core.Models.Validators
+namespace Clay.SmartDoor.Core.Models.Validators.DoorValidators
 {
     public class CreateDoorValidator : AbstractValidator<CreateDoorRecord>
     {
@@ -14,9 +14,6 @@ namespace Clay.SmartDoor.Core.Models.Validators
                 .NotNull().WithMessage("Field is required")
                 .NotEmpty().WithMessage("Field is required");
             RuleFor(d => d.NameTag)
-                .NotNull().WithMessage("Field is required")
-                .NotEmpty().WithMessage("Field is required");
-            RuleFor(d => d.CreatorId)
                 .NotNull().WithMessage("Field is required")
                 .NotEmpty().WithMessage("Field is required");
         }

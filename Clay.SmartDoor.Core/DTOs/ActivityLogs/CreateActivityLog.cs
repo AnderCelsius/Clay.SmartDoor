@@ -1,6 +1,6 @@
 ﻿using Clay.SmartDoor.Core.Entities;
 
-namespace Clay.SmartDoor.Core.DTOs
+namespace Clay.SmartDoor.Core.DTOs.ActivityLogs
 {
     public record CreateActivityLog(
         string Description,

@@ -1,4 +1,4 @@
-﻿using Clay.SmartDoor.Core.Dtos;
+﻿using Clay.SmartDoor.Core.DTOs.Doors;
 using Clay.SmartDoor.Core.Entities;
 using Clay.SmartDoor.Core.Models;
 
@@ -18,6 +18,11 @@ namespace Clay.SmartDoor.Core.Interfaces.CoreServices
         /// <returns>
         /// A response containing the state of the operation.
         /// </returns>
-        Task<ApiResponse<string>> CreateNewDoorAsync(CreateDoorRecord door);
+        Task<ApiResponse<string>> CreateNewDoorAsync(CreateDoorRecord door, string creatorId);
+      
+        Task<ApiResponse<string>> ExitDoorAsync(string doorId, string userId);
+        Task<ApiResponse<DoorDetails>> GetDoorByIdAsync(string doorId);
+        Task<ApiResponse<IEnumerable<DoorDetails>>> GetDoorsAsync();
+        Task<ApiResponse<string>> OpenDoorAsync(DoorAccessRequest door, string userId);
     }
 }

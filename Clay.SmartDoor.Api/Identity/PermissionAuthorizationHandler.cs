@@ -23,7 +23,7 @@ public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionReq
 
         var permissions = context.User.Claims.Where( x => x.Type == "Permission" &&
                                 x.Value == requirement.Permission &&
-                                x.Issuer == "LOCAL AUTHORITY");
+                                x.Issuer == "https://localhost:7114");
 
         if (permissions.Any())
         {
