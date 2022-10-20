@@ -145,6 +145,13 @@ namespace Clay.SmartDoor.Core.Services
                     return ApiResponse<string>.Fail(AuthenticationMessage.User_Already_Exist, 400);
                 }
 
+                // Access Group check
+                var accessGroup = await _unitOfWork.AccessGroups.GetAccessGroupByIdAsync(requestModel.AccessGroupId);
+                if (accessGroup == null)
+                {
+                    return ApiResponse<string>.Fail(AccessGroupMessage.Not_Found, 400);
+                }
+
                 var user = new AppUser
                 {
                     FirstName = requestModel.FirstName,

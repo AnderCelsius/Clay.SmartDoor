@@ -56,4 +56,9 @@
         public const string Add_to_Group_Fail = "Failed to add to group.";
     }
 
+    public class AccessGroupMessage
+    {
+        public const string Not_Found = "Access Group does not exist in record.";
+    }
+
 }

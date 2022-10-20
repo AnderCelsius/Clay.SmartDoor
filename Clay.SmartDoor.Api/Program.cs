@@ -2,7 +2,6 @@ using Clay.SmartDoor.Api.Extentions;
 using Clay.SmartDoor.Core;
 using Clay.SmartDoor.Infrastructure;
 using Serilog;
-using Microsoft.Extensions.DependencyInjection;
 
 // Add Serilog setup
 var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");

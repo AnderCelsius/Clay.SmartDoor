@@ -238,6 +238,34 @@ namespace Clay.SmartDoor.Test.Integration.Services
         }
 
         [Fact]
+        public async Task AddUserAsync_ShouldReturnFailResponse_IfAccessGroupDoesNotExist()
+        {
+            // Arrange
+            var data = new NewUserRequest
+            {
+                FirstName = TestDataGenerator.BasicUser.FirstName,
+                LastName = TestDataGenerator.BasicUser.LastName,
+                Email = TestDataGenerator.BasicUser.Email,
+                Password = "Password@123",
+                AccessGroupId = TestDataGenerator.Default_AccessGroup
+
+            };
+
+            AccessGroup accessGroup = null!;
+
+            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(TestDataGenerator.BasicUser);
+            _mockUnitOfWork.Setup(x => x.AccessGroups.GetAccessGroupByIdAsync(It.IsAny<string>())).ReturnsAsync(accessGroup);
+
+            // Act
+            var response = await _sut.AddUserAsync(data, TestDataGenerator.SuperAdminUser.Id);
+
+            // Assert
+            response.Message.ShouldBe(AccessGroupMessage.Not_Found);
+            response.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);
+            response.Succeeded.ShouldBe(false);
+        }
+
+        [Fact]
         public async Task AddUserAsync_ShouldReturnCreatedResponse_WhenUserIsAddedSuccessfully()
         {
             // Arrange
@@ -252,8 +280,11 @@ namespace Clay.SmartDoor.Test.Integration.Services
             };
 
             AppUser notExistUser = null!;
+
+            AccessGroup accessGroup = TestDataGenerator.OpenAccessGroup;
             
             _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(notExistUser);
+            _mockUnitOfWork.Setup(x => x.AccessGroups.GetAccessGroupByIdAsync(It.IsAny<string>())).ReturnsAsync(accessGroup);
             _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<AppUser>())).ReturnsAsync(IdentityResult.Success);
             _mockUserManager.Setup(x => x.AddToRoleAsync(It.IsAny<AppUser>(), Roles.Basic.ToString()));
 
