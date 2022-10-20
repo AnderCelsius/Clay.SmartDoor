@@ -175,6 +175,41 @@ namespace Clay.SmartDoor.Test.Integration.Services
         }
 
         [Fact]
+        public async Task GetDoorByIdAsync_ShouldReturnNotFoundResponse_WhenDoorDoesNotExist()
+        {
+            // Arrange
+            Door door = null!;
+            mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(door);
+
+            // Act
+            var result = await _sut.GetDoorByIdAsync("qyuiweyweuhuier");
+
+            // Assert
+            result.StatusCode.ShouldBe((int)HttpStatusCode.NotFound);
+            result.Message.ShouldBe(DoorMessage.Not_Found);
+            result.Data.ShouldBe(null);
+            result.Succeeded.ShouldBe(false);
+        }
+
+        [Fact]
+        public async Task GetDoorByIdAsync_ShouldReturnOkResponse_DoorIsFound()
+        {
+            // Arrange
+            Door door = TestDataGenerator.DefaultDoor;
+            mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(door.Id)).ReturnsAsync(door);
+
+            // Act
+            var result = await _sut.GetDoorByIdAsync(door.Id);
+
+            // Assert
+            result.StatusCode.ShouldBe((int)HttpStatusCode.OK);
+            result.Message.ShouldBe(ApiResponseMesage.Ok_Result);
+            result.Data.Id.ShouldBe(door.Id);
+            result.Data.NameTag.ShouldBe(door.NameTag);
+            result.Succeeded.ShouldBe(true);
+        }
+
+        [Fact]
         public async Task OpenDoorAsync_ShouldReturnForbiddenResponse_WhenUserDoesNotBelongToAccessGroup()
         {
             // Arrange

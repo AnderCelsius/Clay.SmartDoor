@@ -24,7 +24,7 @@
 
     public class AssignedDoor
     {
-        public string Id { get; set; } = string.Empty;
+        public string DoorId { get; set; } = string.Empty;
         public bool Assigned { get; set; }
     }
 }

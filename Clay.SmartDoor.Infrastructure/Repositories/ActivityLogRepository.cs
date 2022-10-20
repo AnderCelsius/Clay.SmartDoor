@@ -17,7 +17,8 @@ namespace Clay.SmartDoor.Infrastructure.Repositories
         public IQueryable<ActivityLog> GetUserActivityLogs(string userId, DateTime fromDate, DateTime toDate)
         {
             return _context.ActivityLogs.AsNoTracking()
-                .Where(x => x.ActionBy == userId && x.Time >= fromDate && x.Time <= toDate)
+                .Where(x => x.ActionBy == userId &&
+                EF.Functions.DateDiffDay(fromDate, x.Time) >= 0 && EF.Functions.DateDiffDay(x.Time, toDate) >= 0)
                 .OrderByDescending(x => x.Time);
         }
     }

@@ -87,7 +87,7 @@ namespace Clay.SmartDoor.Core.Services
                 var activityLog = new ActivityLog
                 {
                     Time = DateTime.Now,
-                    Description = ActivityDescriptions.Door_Created,
+                    Description = ActivityDescriptions.Exit_Door,
                     ActionBy = actionBy,
                     DoorId = doorId,
                     Building = door.Building,

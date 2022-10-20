@@ -13,7 +13,7 @@ namespace Clay.SmartDoor.Infrastructure
             this IServiceCollection services, 
             IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            var connectionString = configuration.GetConnectionString("LocalConnection");
             var serverVersion = new MySqlServerVersion(new Version(8, 0, 29));
             services.AddDbContext<SmartDoorContext>(options =>
                 options.UseMySql(connectionString, serverVersion));
