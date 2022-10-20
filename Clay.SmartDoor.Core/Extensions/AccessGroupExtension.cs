@@ -25,7 +25,7 @@ namespace Clay.SmartDoor.Core.Extensions
                 }).ToList(),
                 AssignedDoors = accessGroup.DoorAssignment.Select( x => new AssignedDoor
                 {
-                    Id = x.Id,
+                    DoorId = x.DoorId,
                     Assigned = x.Assigned
                 }).ToList()
             };

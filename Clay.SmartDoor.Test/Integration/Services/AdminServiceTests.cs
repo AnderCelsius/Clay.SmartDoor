@@ -161,7 +161,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
             var response = await _sut.AddDoorToAcessGroupAsync(model, TestDataGenerator.SuperAdminUser.Id);
 
             // Assert
-            response.Message.ShouldBe(Constants.Generic_Fail_Already_Exist_Message);
+            response.Message.ShouldBe(DoorMessage.Door_Create_Fail_Exist_Because_Found);
             response.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);
             response.Succeeded.ShouldBe(false);
         }
