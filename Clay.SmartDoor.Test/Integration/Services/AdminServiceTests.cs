@@ -549,5 +549,118 @@ namespace Clay.SmartDoor.Test.Integration.Services
             response.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);
             response.Succeeded.ShouldBe(false);
         }
+
+        [Fact]
+        public async Task UpdateUserAccessGroup_ShouldReturnFailedResponse_IfAccessGroupIsNotFound()
+        {
+            // Arrange
+            UpdateUserAccessGroup requestModel = new()
+            {
+                NewAccessGroupId = Guid.NewGuid().ToString(),
+                OldAccessGroupId = Guid.NewGuid().ToString(),
+                UserId = TestDataGenerator.Default_Id
+            };
+
+            AccessGroup accessGroup = null!;
+
+            _mockUnitOfWork.Setup(x => x.AccessGroups.GetAccessGroupByIdAsync(It.IsAny<string>())).ReturnsAsync(accessGroup);
+
+            // Act
+            var response = await _sut.UpdateUserAccessGroup(requestModel, Guid.NewGuid().ToString());
+
+            // Assert
+            response.StatusCode.ShouldBe((int)HttpStatusCode.NotFound);
+            response.Succeeded.ShouldBe(false);
+            response.Data.ShouldBe(null);
+            response.Message.ShouldBe(Constants.Generic_Not_Found_Message);
+        }
+
+        [Fact]
+        public async Task UpdateUserAccessGroup_ShouldReturnFailedResponse_IfUserIsNotFound()
+        {
+            // Arrange
+            UpdateUserAccessGroup requestModel = new()
+            {
+                NewAccessGroupId = Guid.NewGuid().ToString(),
+                OldAccessGroupId = Guid.NewGuid().ToString(),
+                UserId = TestDataGenerator.Default_Id
+            };
+
+            AccessGroup newAccessGroup = TestDataGenerator.SecureAccessGroup;
+            AccessGroup oldAccessGroup = TestDataGenerator.OpenAccessGroup;
+            AppUser user = null!;
+
+            _mockUnitOfWork.Setup(x => x.AccessGroups.GetAccessGroupByIdAsync(requestModel.OldAccessGroupId)).ReturnsAsync(oldAccessGroup);
+            _mockUnitOfWork.Setup(x => x.AccessGroups.GetAccessGroupByIdAsync(requestModel.NewAccessGroupId)).ReturnsAsync(newAccessGroup);
+            _mockUserManager.Setup(x => x.FindByIdAsync(requestModel.UserId)).ReturnsAsync(user);
+            // Act
+            var response = await _sut.UpdateUserAccessGroup(requestModel, Guid.NewGuid().ToString());
+
+            // Assert
+            response.StatusCode.ShouldBe((int)HttpStatusCode.NotFound);
+            response.Succeeded.ShouldBe(false);
+            response.Data.ShouldBe(null);
+            response.Message.ShouldBe(Constants.Generic_Not_Found_Message);
+        }
+
+        [Fact]
+        public async Task UpdateUserAccessGroup_ShouldReturnFailedResponse_IfUserDoesNotBelongToOldAccessGroup()
+        {
+            // Arrange
+            UpdateUserAccessGroup requestModel = new()
+            {
+                NewAccessGroupId = Guid.NewGuid().ToString(),
+                OldAccessGroupId = Guid.NewGuid().ToString(),
+                UserId = TestDataGenerator.Default_Id
+            };
+
+            AccessGroup newAccessGroup = TestDataGenerator.SecureAccessGroup;
+            AccessGroup oldAccessGroup = TestDataGenerator.OpenAccessGroup;
+            AppUser user = TestDataGenerator.AdminUser;
+
+            _mockUnitOfWork.Setup(x => x.AccessGroups.GetAccessGroupByIdAsync(requestModel.OldAccessGroupId)).ReturnsAsync(oldAccessGroup);
+            _mockUnitOfWork.Setup(x => x.AccessGroups.GetAccessGroupByIdAsync(requestModel.NewAccessGroupId)).ReturnsAsync(newAccessGroup);
+            _mockUserManager.Setup(x => x.FindByIdAsync(requestModel.UserId)).ReturnsAsync(user);
+
+            // Act
+            var response = await _sut.UpdateUserAccessGroup(requestModel, TestDataGenerator.SuperAdminUser.Id);
+
+            // Assert
+            response.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);
+            response.Succeeded.ShouldBe(false);
+            response.Data.ShouldBe(null);
+            response.Message.ShouldBe(Constants.Generic_Fail_User_Does_Not_Belong_Message);
+        }
+
+        [Fact]
+        public async Task UpdateUserAccessGroup_ShouldReturnOkResponse_WhenUpdateIsSuccessful()
+        {
+            // Arrange
+            UpdateUserAccessGroup requestModel = new()
+            {
+                NewAccessGroupId = Guid.NewGuid().ToString(),
+                OldAccessGroupId = Guid.NewGuid().ToString(),
+                UserId = TestDataGenerator.Default_Id
+            };
+
+            AccessGroup newAccessGroup = TestDataGenerator.SecureAccessGroup;
+            AccessGroup oldAccessGroup = TestDataGenerator.OpenAccessGroup;
+            AppUser user = TestDataGenerator.AdminUser;
+
+            oldAccessGroup.Users.Add(user);
+
+            _mockUnitOfWork.Setup(x => x.AccessGroups.GetAccessGroupByIdAsync(requestModel.OldAccessGroupId)).ReturnsAsync(oldAccessGroup);
+            _mockUnitOfWork.Setup(x => x.AccessGroups.GetAccessGroupByIdAsync(requestModel.NewAccessGroupId)).ReturnsAsync(newAccessGroup);
+            _mockUserManager.Setup(x => x.FindByIdAsync(requestModel.UserId)).ReturnsAsync(user);
+           
+            // Act
+            var response = await _sut.UpdateUserAccessGroup(requestModel, TestDataGenerator.SuperAdminUser.Id);
+
+            // Assert
+            response.StatusCode.ShouldBe((int)HttpStatusCode.OK);
+            response.Succeeded.ShouldBe(true);
+            response.Data.ShouldNotBe(null);
+            response.Message.ShouldBe(ApiResponseMesage.User_Group_Update_Success);
+        }
     }
 }

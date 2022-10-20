@@ -124,5 +124,24 @@ namespace Clay.SmartDoor.Test.Helper
             new IdentityRole(Roles.Basic.ToString())
         };
 
+        public static AccessGroup SecureAccessGroup = new()
+        {
+            Id = Default_SecureGroup_One,
+            Name = "Secure Group",
+            IsActive = true,
+            CreatedAt = DateTime.Now,
+            CreatedBy = "22eef6fa-2843-4516-a410-f7518703499a",
+            LastModified = DateTime.Now
+        };
+
+        public static AccessGroup OpenAccessGroup = new()
+        {
+            Id = Default_AccessGroup,
+            Name = "Open Group",
+            IsActive = true,
+            CreatedAt = DateTime.Now,
+            CreatedBy = "22eef6fa-2843-4516-a410-f7518703499a",
+            LastModified = DateTime.Now,
+        };
     }
 }
