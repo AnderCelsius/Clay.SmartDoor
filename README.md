@@ -46,7 +46,12 @@ This project adopted the Clean Architectural pattern as it encapsulates the busi
 * Testability.It is highly testable. Business rules canbe tested without considering UI or database.
 
 ## Design Pattern
+
 I have adopted the UnitOfWork design pattern. Since more than one database interaction can happen in a single request, the unit of work helps to ensure
 that certain operations are handled as a single operation and would rollback if an operation fail. This way, the integrity of the system will be maintained and the activity logging can be trusted.
+
+## Logging
+
+I used serilog as it provides a very good reference for structured logging. Although Microsoft Extensions Logging and some others exists, I chose serilog because of the added advantages. Serilog easily captures key attributes and data about the context of the message. It also does this automatically and have sinks that support logging to file and even cloud dbs like seq or ravendb.
 
 
