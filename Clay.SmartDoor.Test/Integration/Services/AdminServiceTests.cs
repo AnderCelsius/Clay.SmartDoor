@@ -143,6 +143,30 @@ namespace Clay.SmartDoor.Test.Integration.Services
         }
 
         [Fact]
+        public async Task AddDoorToAcessGroupAsync_ShouldReturnFailResponse_WhenGroupDoesNotExist()
+        {
+            // Arrange
+            var model = new DoorAccessRequest
+            {
+                DoorId = TestDataGenerator.Default_Id,
+                AccessGroupId = TestDataGenerator.Default_AccessGroup
+            };
+
+            Door foundDoor = TestDataGenerator.DefaultDoor;
+            AccessGroup accessGroup = null!;
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(model.DoorId)).ReturnsAsync(foundDoor);
+            _mockUnitOfWork.Setup(uow => uow.AccessGroups.GetAccessGroupByIdAsync(It.IsAny<string>())).ReturnsAsync(accessGroup);
+
+            // Act
+            var response = await _sut.AddDoorToAcessGroupAsync(model, TestDataGenerator.SuperAdminUser.Id);
+
+            // Assert
+            response.Message.ShouldBe(AccessGroupMessage.Not_Found);
+            response.StatusCode.ShouldBe((int)HttpStatusCode.NotFound);
+            response.Succeeded.ShouldBe(false);
+        }
+
+        [Fact]
         public async Task AddDoorToAcessGroupAsync_ShouldReturnFailResponse_WhenDoorAlreadyBelongsToGroup()
         {
             // Arrange
@@ -153,8 +177,9 @@ namespace Clay.SmartDoor.Test.Integration.Services
             };
 
             var doorAssignment = new DoorAssignment();
-
+            var accessGroup = TestDataGenerator.OpenAccessGroup;
             _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(model.DoorId)).ReturnsAsync(TestDataGenerator.DefaultDoor);
+            _mockUnitOfWork.Setup(uow => uow.AccessGroups.GetAccessGroupByIdAsync(It.IsAny<string>())).ReturnsAsync(accessGroup);
             _mockUnitOfWork.Setup(uow => uow.DoorAssignments.GetDoorAssignmentAsync(model.DoorId, model.AccessGroupId)).ReturnsAsync(doorAssignment);
 
             // Act
@@ -179,6 +204,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
             DoorAssignment doorAssignment = null!;
 
             _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(model.DoorId)).ReturnsAsync(TestDataGenerator.DefaultDoor);
+            _mockUnitOfWork.Setup(uow => uow.AccessGroups.GetAccessGroupByIdAsync(model.AccessGroupId)).ReturnsAsync(TestDataGenerator.OpenAccessGroup);
             _mockUnitOfWork.Setup(uow => uow.DoorAssignments.GetDoorAssignmentAsync(model.DoorId, model.AccessGroupId)).ReturnsAsync(doorAssignment);
 
             // Act
@@ -252,8 +278,9 @@ namespace Clay.SmartDoor.Test.Integration.Services
             };
 
             AccessGroup accessGroup = null!;
+            AppUser user = null!;
 
-            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(TestDataGenerator.BasicUser);
+            _mockUserManager.Setup(x => x.FindByEmailAsync(It.IsAny<string>())).ReturnsAsync(user);
             _mockUnitOfWork.Setup(x => x.AccessGroups.GetAccessGroupByIdAsync(It.IsAny<string>())).ReturnsAsync(accessGroup);
 
             // Act
@@ -261,7 +288,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
 
             // Assert
             response.Message.ShouldBe(AccessGroupMessage.Not_Found);
-            response.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);
+            response.StatusCode.ShouldBe((int)HttpStatusCode.NotFound);
             response.Succeeded.ShouldBe(false);
         }
 
@@ -393,16 +420,19 @@ namespace Clay.SmartDoor.Test.Integration.Services
         public async Task GetUserActivityLogAsync_ShouldReturnEmptyListAndOkResponse_WhenActivityListIsEmpty()
         {
             // Arrange
+            AppUser user = TestDataGenerator.BasicUser;
             var request = new ActivityLogsRequest
             {
-                UserId = TestDataGenerator.Default_Id,
+                UserId = user.Id,
                 FromDate = DateTime.Now.AddDays(-1),
                 ToDate = DateTime.Now.AddDays(1),
             };
 
             List<ActivityLog> logs = new();
+
+            _mockUserManager.Setup(x => x.FindByIdAsync(request.UserId)).ReturnsAsync(user);
             _mockUnitOfWork.Setup(uow => uow.ActivityLogs
-                    .GetUserActivityLogs(TestDataGenerator.Default_Id, DateTime.Now, DateTime.Now))
+                    .GetUserActivityLogs(user.Id, DateTime.Now, DateTime.Now))
                     .Returns(logs.AsQueryable());
 
 
@@ -422,16 +452,20 @@ namespace Clay.SmartDoor.Test.Integration.Services
         public async Task GetUserActivityLogAsync_ShouldReturnListOfActivitiesAndOkResponse_WhenRecordsExist()
         {
             // Arrange
+            AppUser user = TestDataGenerator.BasicUser;
+
             List<ActivityLog> logs = new()
             {
                 TestDataGenerator.activityLog,
             };
             var request = new ActivityLogsRequest
             {
-                UserId = TestDataGenerator.Default_Id,
+                UserId = user.Id,
                 FromDate = DateTime.Now.AddDays(-1),
                 ToDate = DateTime.Now.AddDays(1),
             };
+
+            _mockUserManager.Setup(x => x.FindByIdAsync(request.UserId)).ReturnsAsync(user);
 
             _mockUnitOfWork.Setup(uow => uow.ActivityLogs
                     .GetUserActivityLogs(request.UserId, request.FromDate, request.ToDate))
@@ -448,19 +482,47 @@ namespace Clay.SmartDoor.Test.Integration.Services
         }
 
         [Fact]
+        public async Task GetUserActivityLogAsync_ShouldFailedResponse_WhenUserDoesNotExist()
+        {
+            // Arrange
+            AppUser user = null!;
+
+            var request = new ActivityLogsRequest
+            {
+                UserId = "ranlrnglernglewkrn",
+                FromDate = DateTime.Now.AddDays(-1),
+                ToDate = DateTime.Now.AddDays(1),
+            };
+
+            _mockUserManager.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(user);
+
+            // Act
+            var response = await _sut.GetUserActivityLogAsync(request);
+
+            // Assert
+            response.Message.ShouldBe(Constants.Generic_Fail_User_Not_Found_Message);
+            response.StatusCode.ShouldBe((int)HttpStatusCode.NotFound);
+            response.Succeeded.ShouldBe(false);
+        }
+
+        [Fact]
         public async Task GetUserActivityLogAsync_ShouldHandleExceptionAndReturnFailedResponse_WhenExceptionIsThrown()
         {
             // Arrange
+            AppUser user = TestDataGenerator.BasicUser;
+
             List<ActivityLog> logs = new()
             {
                 TestDataGenerator.activityLog,
             };
             var request = new ActivityLogsRequest
             {
-                UserId = TestDataGenerator.Default_Id,
+                UserId = user.Id,
                 FromDate = DateTime.Now.AddDays(-1),
                 ToDate = DateTime.Now.AddDays(1),
             };
+
+            _mockUserManager.Setup(x => x.FindByIdAsync(request.UserId)).ReturnsAsync(user);
 
             _mockUnitOfWork.Setup(uow => uow.ActivityLogs
                     .GetUserActivityLogs(request.UserId, request.FromDate, request.ToDate))

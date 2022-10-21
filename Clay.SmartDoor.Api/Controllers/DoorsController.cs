@@ -21,7 +21,7 @@ namespace Clay.SmartDoor.Api.Controllers
         }
 
         /// <summary>
-        /// Adds a new door to the database.
+        /// Adds a new door to the database
         /// </summary>
         /// <param name="doorModel"></param>
         /// <param name="userId">The user calling the endpoint.</param>
@@ -53,7 +53,7 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="200">If the user successfully gets access</response>
         /// <response code="401">when caller is not calling this enpoint with the right bearer token</response>
         /// <response code="403">When caller does not belong to the required group to access door</response>
-        [Route("exit")]
+        [Route("exit/{doorId}")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -67,7 +67,7 @@ namespace Clay.SmartDoor.Api.Controllers
 
 
         /// <summary>
-        /// Retrieves the details of all doors.
+        /// Retrieves the details of all doors
         /// </summary>
         /// <returns></returns>
         /// <response code="200">When the API call completes</response>
@@ -83,12 +83,12 @@ namespace Clay.SmartDoor.Api.Controllers
         }
 
         /// <summary>
-        /// Retrieves the details of all doors.
+        /// Retrieves the details of a door
         /// </summary>
         /// <returns></returns>
         /// <response code="200">When the API call completes</response>
         /// <response code="401">when caller is not calling this enpoind with the right bearer token</response> 
-        [Route("get-all/{doorId}")]
+        [Route("get/{doorId}")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -102,21 +102,21 @@ namespace Clay.SmartDoor.Api.Controllers
         /// Grants user access to a given door if they pass all security requirements
         /// </summary>
         /// <param name="userId">The Id of the user calling the endpoint.</param>
-        /// <param name="doorModel"></param>
+        /// <param name="doorId">The Id of the door to be opened</param>
         /// <returns></returns>
-        /// <response code="202">If the user successfully gets access</response>
+        /// <response code="200">If the user successfully gets access</response>
         /// <response code="401">when caller is not calling this enpoint with the right bearer token</response>
         /// <response code="403">When caller does not belong to the required group to access door</response>
-        [Route("open")]
+        [Route("open/{doorId}")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Open(
             [ModelBinder(BinderType = typeof(AuthenticatedUserIdBinder))] string userId,
-            [FromBody] DoorAccessRequest doorModel)
+            string doorId)
         {
-            var result = await _doorService.OpenDoorAsync(doorModel, userId);
+            var result = await _doorService.OpenDoorAsync(doorId, userId);
             return StatusCode(result.StatusCode, result);
         }
 

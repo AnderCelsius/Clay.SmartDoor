@@ -9,6 +9,7 @@
         public const string Generic_Not_Found_Message = "Not Found.";
         public const string Generic_Save_Success_Message = "Changes persisted to database.";
         public const string Generic_Fail_Already_Exist_Message = "Operation failed. Item already exist.";
+        public const string Generic_Fail_User_Not_Found_Message = "Operation failed. User not found.";
         public const string Generic_Fail_User_Already_Exist_Message = "Operation failed. User already belongs to group.";
         public const string Generic_Fail_User_Does_Not_Belong_Message = "Operation failed. User does not belong to group.";
         public const string Generic_Fail_Does_Not_Exist_Message = "Operation failed. Item does not exist in group.";
@@ -59,6 +60,7 @@
     public class AccessGroupMessage
     {
         public const string Not_Found = "Access Group does not exist in record.";
+        public const string Door_Not_Assigned = "Door not assigned to Group";
     }
 
 }

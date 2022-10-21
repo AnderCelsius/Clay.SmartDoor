@@ -18,15 +18,16 @@ namespace Clay.SmartDoor.Api.Controllers
         }
 
         /// <summary>
-        /// Authenticate as user and returns a jwt token for subsequent operations.
+        /// Authenticate as user and returns a jwt token for subsequent operations
         /// </summary>
         /// <response code="200">If the operation is successful</response>
+        /// <response code="401">If user credentials are not correct.</response>
         /// <response code="403">If user credentials are correct but the account is inactive.</response>
         [AllowAnonymous]
         [Route("login")]
         [HttpPost]
-        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> AuthenticateAsync([FromBody] LoginRequest request)
         {
             var result = await _authenticationService.AuthenticateUserAsync(request);

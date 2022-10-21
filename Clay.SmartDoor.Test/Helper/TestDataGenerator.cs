@@ -10,11 +10,14 @@ namespace Clay.SmartDoor.Test.Helper
 {
     internal class TestDataGenerator
     {
+        #region Constants
         public const string Default_Id = "33e09d95-51d3-41ed-a2ae-faff5e711078";
         public const string Default_Door_Id = "bef094a4027a-51d3-41ed-a2ae-ba63545f";
         public const string Default_AccessGroup = "33e09d95-60c1-41ed-a2ae-faff5e711078";
         public const string Default_SecureGroup_One = "ba63545f-2c49-4954-983c-bef094a4027a";
+        #endregion
 
+        #region Users
         public static AppUser SuperAdminUser = new()
         {
             FirstName = "Obinna",
@@ -62,10 +65,14 @@ namespace Clay.SmartDoor.Test.Helper
             IsActive = false,
             AccessGroupId = Default_AccessGroup
         };
+        #endregion
 
+        #region Ids
         public static string ActionBy = Default_Id;
         public static CreateDoorRecord RequestModel = new("Main Door", "Uno", "1st Floor");
+        #endregion
 
+        #region Doors
         public static Door DefaultDoor = new()
         {
             Id = Default_Door_Id,
@@ -74,7 +81,7 @@ namespace Clay.SmartDoor.Test.Helper
             LastModified = DateTime.Now,
             CreatedBy = Default_Id,
             Building = RequestModel.Building,
-            Floor = RequestModel.Floor
+            Floor = RequestModel.Floor,
         };
 
         public static ActivityLog activityLog = new()
@@ -87,7 +94,9 @@ namespace Clay.SmartDoor.Test.Helper
             Floor = RequestModel.Floor,
             DoorTag = DefaultDoor.NameTag,
         };
-
+        #endregion
+        
+        #region List
         public static IEnumerable<Door> GenerateDummyDoors(List<string> doorIds)
         {
             List<Door> doors = new();
@@ -123,7 +132,9 @@ namespace Clay.SmartDoor.Test.Helper
             new IdentityRole(Roles.Admin.ToString()),
             new IdentityRole(Roles.Basic.ToString())
         };
+        #endregion
 
+        #region Access Groups
         public static AccessGroup SecureAccessGroup = new()
         {
             Id = Default_SecureGroup_One,
@@ -143,5 +154,6 @@ namespace Clay.SmartDoor.Test.Helper
             CreatedBy = "22eef6fa-2843-4516-a410-f7518703499a",
             LastModified = DateTime.Now,
         };
+        #endregion
     }
 }

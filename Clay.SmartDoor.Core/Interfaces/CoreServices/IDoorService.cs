@@ -23,6 +23,6 @@ namespace Clay.SmartDoor.Core.Interfaces.CoreServices
         Task<ApiResponse<string>> ExitDoorAsync(string doorId, string userId);
         Task<ApiResponse<DoorDetails>> GetDoorByIdAsync(string doorId);
         Task<ApiResponse<IEnumerable<DoorDetails>>> GetDoorsAsync();
-        Task<ApiResponse<string>> OpenDoorAsync(DoorAccessRequest door, string userId);
+        Task<ApiResponse<string>> OpenDoorAsync(string doorId, string userId);
     }
 }
