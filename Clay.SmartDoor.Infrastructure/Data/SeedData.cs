@@ -30,7 +30,7 @@ namespace Clay.SmartDoor.Infrastructure.Data
 
                 await userManager.AddToRoleAsync(SuperAdminUser, Roles.SuperAdmin.ToString());
                 await userManager.AddToRoleAsync(AdminUser, Roles.Admin.ToString());
-                await userManager.AddToRoleAsync(AdminUser, Roles.Basic.ToString());
+                await userManager.AddToRoleAsync(BasicUser, Roles.Basic.ToString());
             }
 
             await roleManager.SeedClaimsForSuperAdmin();
@@ -71,12 +71,32 @@ namespace Clay.SmartDoor.Infrastructure.Data
             }
         }
 
+        public static async Task SeedInactiveUsersAsync(
+           UserManager<AppUser> userManager)
+        {
+
+            try
+            {
+                var user = await userManager.FindByEmailAsync(InActiveUser.Email);
+
+                if (user == null)
+                {
+                    await userManager.CreateAsync(InActiveUser, Default_Password);
+
+                    await userManager.AddToRoleAsync(InActiveUser, Roles.Basic.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, ex.Message);
+            }
+        }
+
         private async static Task SeedClaimsForSuperAdmin(
             this RoleManager<IdentityRole> roleManager)
         {
             var superAdminRole = await roleManager.FindByNameAsync(Roles.SuperAdmin.ToString());
             await roleManager.AddPermissionClaim(superAdminRole, "User");
-            await roleManager.AddPermissionClaim(superAdminRole, "Access");
         }
 
         public async static Task SeedAccessGroups(
@@ -91,11 +111,13 @@ namespace Clay.SmartDoor.Infrastructure.Data
             this RoleManager<IdentityRole> roleManager, 
             IdentityRole role, string module)
         {
+            var allPermissions = new List<string>();
             var allClaims = await roleManager.GetClaimsAsync(role);
-            var allPermissions = Permissions.GeneratePermissions(module);
+            var modulePermissions = Permissions.GeneratePermissions(module);
             var accessPermissions = Permissions.GenerateAccessPermissions();
 
-            allPermissions.AddRange(allPermissions);
+            allPermissions.AddRange(modulePermissions);
+            allPermissions.AddRange(accessPermissions);
 
             foreach (var permission in allPermissions)
             {
@@ -165,6 +187,18 @@ namespace Clay.SmartDoor.Infrastructure.Data
             EmailConfirmed = true,
             PhoneNumberConfirmed = true,
             IsActive = true,
+            AccessGroupId = Default_AccessGroup
+        };
+
+        public static AppUser InActiveUser = new()
+        {
+            FirstName = "Rose",
+            LastName = "Anderson",
+            Email = "rose@email.com",
+            UserName = "rose@email.com",
+            EmailConfirmed = true,
+            PhoneNumberConfirmed = true,
+            IsActive = false,
             AccessGroupId = Default_AccessGroup
         };
         #endregion

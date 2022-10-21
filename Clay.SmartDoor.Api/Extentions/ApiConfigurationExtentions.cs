@@ -144,6 +144,11 @@ namespace Clay.SmartDoor.Api.Extentions
 
             services.AddAuthorization(options =>
             {
+                options.AddPolicy("Access.Read", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("Permission", Permissions.Access.Read);
+                });
                 options.AddPolicy("Access.Create", policy =>
                  {
                      policy.RequireAuthenticatedUser();
@@ -153,11 +158,6 @@ namespace Clay.SmartDoor.Api.Extentions
                 {
                     policy.RequireAuthenticatedUser();
                     policy.RequireClaim("Permission", Permissions.Access.Grant);
-                });
-                options.AddPolicy("Access.View", policy =>
-                {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("Permission", Permissions.Access.View);
                 });
                 options.AddPolicy("Access.Revoke", policy =>
                 {

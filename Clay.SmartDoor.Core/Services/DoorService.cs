@@ -5,6 +5,7 @@ using Clay.SmartDoor.Core.Interfaces.CoreServices;
 using Clay.SmartDoor.Core.Interfaces.InfrastructureServices;
 using Clay.SmartDoor.Core.Models;
 using Clay.SmartDoor.Core.Models.Constants;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Net;
@@ -13,11 +14,15 @@ namespace Clay.SmartDoor.Core.Services
 {
     public class DoorService : IDoorService
     {
+        private readonly UserManager<AppUser> _userManger;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger _logger;
 
-        public DoorService(IUnitOfWork unitOfWork, ILogger logger)
+        public DoorService(
+            UserManager<AppUser> userManger,
+            IUnitOfWork unitOfWork, ILogger logger)
         {
+            _userManger = userManger;
             _unitOfWork = unitOfWork;
             _logger = logger;
         }
@@ -71,7 +76,7 @@ namespace Clay.SmartDoor.Core.Services
             }
         }
     
-        public async Task<ApiResponse<string>> ExitDoorAsync(string doorId, string actionBy)
+        public async Task<ApiResponse<string>> ExitDoorAsync(string doorId, string userId)
         {
             try
             {
@@ -88,7 +93,7 @@ namespace Clay.SmartDoor.Core.Services
                 {
                     Time = DateTime.Now,
                     Description = ActivityDescriptions.Exit_Door,
-                    ActionBy = actionBy,
+                    ActionBy = userId,
                     DoorId = doorId,
                     Building = door.Building,
                     Floor = door.Floor,
@@ -152,12 +157,12 @@ namespace Clay.SmartDoor.Core.Services
             }
         }
 
-        public async Task<ApiResponse<string>> OpenDoorAsync(DoorAccessRequest model, string userId)
+        public async Task<ApiResponse<string>> OpenDoorAsync(string doorId, string userId)
         {
             try
             {
                 _logger.Information(Constants.Generic_Begin_Operation_Message);
-                var door = await _unitOfWork.Doors.GetDoorAsync(model.DoorId);
+                var door = await _unitOfWork.Doors.GetDoorAsync(doorId);
 
                 if(door == null)
                 {
@@ -165,7 +170,9 @@ namespace Clay.SmartDoor.Core.Services
                     return ApiResponse<string>.Fail(DoorMessage.Not_Found);
                 }
 
-                var assignedDoor = await _unitOfWork.DoorAssignments.GetDoorAssignmentAsync(model.DoorId, model.AccessGroupId);
+                var user = await _userManger.FindByIdAsync(userId);
+
+                var assignedDoor = await _unitOfWork.DoorAssignments.GetDoorAssignmentAsync(doorId, user.AccessGroupId);
 
                 if (assignedDoor == null)
                 {
@@ -174,7 +181,7 @@ namespace Clay.SmartDoor.Core.Services
                         Time = DateTime.Now,
                         Description = ActivityDescriptions.Access_Denied,
                         ActionBy = userId,
-                        DoorId = model.DoorId,
+                        DoorId = doorId,
                         Building = door.Building,
                         Floor = door.Floor,
                         DoorTag = door.NameTag
@@ -187,13 +194,12 @@ namespace Clay.SmartDoor.Core.Services
                     return ApiResponse<string>.Fail(AuthenticationMessage.Forbidden, 403);
                 }
 
-
                 var activityLog = new ActivityLog
                 {
                     Time = DateTime.Now,
                     Description = ActivityDescriptions.Door_Opened,
                     ActionBy = userId,
-                    DoorId = model.DoorId,
+                    DoorId = doorId,
                     Building = door.Building,
                     Floor = door.Floor,
                     DoorTag = door.NameTag

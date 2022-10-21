@@ -5,7 +5,7 @@
         public static List<string> GeneratePermissions(string module) => new()
         {
             $"Permissions.{module}.Delete",
-            $"Permissions.{module}.Create",
+            $"Permissions.{module}.Create"
         };
 
         public static List<string> GenerateAccessPermissions() => new()
@@ -13,7 +13,7 @@
             Access.Create,
             Access.Grant,
             Access.Revoke,
-            Access.View,
+            Access.Read,
         };
 
         public static class User
@@ -27,7 +27,7 @@
             public const string Create = "Permissions.Access.Create";
             public const string Grant = "Permissions.Access.Grant";
             public const string Revoke = "Permissions.Access.Revoke";
-            public const string View = "Permissions.Access.View";
+            public const string Read = "Permissions.Access.Read";
         }
     }
 }

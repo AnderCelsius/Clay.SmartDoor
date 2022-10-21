@@ -10,7 +10,6 @@ using Clay.SmartDoor.Core.Models.Constants;
 using Clay.SmartDoor.Core.Models.Enums;
 using Clay.SmartDoor.Core.Models.Pagination;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Net;
 using System.Transactions;
@@ -91,6 +90,12 @@ namespace Clay.SmartDoor.Core.Services
                     return ApiResponse<string>.Fail(DoorMessage.Not_Found);
                 }
 
+                var group = await _unitOfWork.AccessGroups.GetAccessGroupByIdAsync(requestModel.AccessGroupId);
+                if (group == null)
+                {
+                    return ApiResponse<string>.Fail(AccessGroupMessage.Not_Found);
+                }
+
                 var doorExistInGroup = await _unitOfWork.DoorAssignments.GetDoorAssignmentAsync(requestModel.DoorId, requestModel.AccessGroupId);
 
                 if (doorExistInGroup != null)
@@ -143,6 +148,13 @@ namespace Clay.SmartDoor.Core.Services
                 if (userExist != null)
                 {
                     return ApiResponse<string>.Fail(AuthenticationMessage.User_Already_Exist, 400);
+                }
+
+                // Access Group check
+                var accessGroup = await _unitOfWork.AccessGroups.GetAccessGroupByIdAsync(requestModel.AccessGroupId);
+                if (accessGroup == null)
+                {
+                    return ApiResponse<string>.Fail(AccessGroupMessage.Not_Found);
                 }
 
                 var user = new AppUser
@@ -284,6 +296,12 @@ namespace Clay.SmartDoor.Core.Services
         {
             try
             {
+                var userExist = await _userManager.FindByIdAsync(requestModel.UserId);
+                if (userExist == null)
+                {
+                    return ApiResponse<IEnumerable<ActivityLogDetails>>.Fail(Constants.Generic_Fail_User_Not_Found_Message);
+                }
+
                 var logsQuery = _unitOfWork.ActivityLogs
                     .GetUserActivityLogs(requestModel.UserId, requestModel.FromDate, requestModel.ToDate);
 

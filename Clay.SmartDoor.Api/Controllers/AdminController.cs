@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Clay.SmartDoor.Api.Controllers
 {
     [Route("api/v1/admin")]
+    [Authorize]
     [ApiController]
     public class AdminController : ControllerBase
     {
@@ -23,7 +24,7 @@ namespace Clay.SmartDoor.Api.Controllers
 
 
         /// <summary>
-        /// Creates a new Access Group.
+        /// Creates a new Access Group. 
         /// 
         /// This will additionally log the activity.
         /// </summary>
@@ -105,7 +106,7 @@ namespace Clay.SmartDoor.Api.Controllers
 
 
         /// <summary>
-        /// Adds a user to access group.
+        /// Adds a user to access group
         /// 
         /// </summary>
         /// <param name="userId"></param>
@@ -130,7 +131,7 @@ namespace Clay.SmartDoor.Api.Controllers
 
 
         /// <summary>
-        /// Retrievs all AccessGroups.
+        /// Retrievs all AccessGroups
         /// </summary>
         /// <remarks>
         /// <list type="bullet">
@@ -143,6 +144,7 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="401">If jwt token provided is invalid.</response>
         [HttpGet]
         [Route("access-groups")]
+        [Authorize(Policy = "Access.Read")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult> GetAccessGroups(GroupState groupState)
@@ -161,6 +163,7 @@ namespace Clay.SmartDoor.Api.Controllers
         /// <response code="401">If jwt token provided is invalid.</response>
         [HttpGet]
         [Route("user-activity-logs")]
+        [Authorize(Policy = "Access.Read")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<IEnumerable<ActivityLogDetails>>> GetUserActivityLogs(

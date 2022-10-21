@@ -19,6 +19,7 @@ namespace Clay.SmartDoor.Infrastructure.Data
 
                 await SeedData.SeedAccessGroups(context);
                 await SeedData.SeedDefaultRolesAsync(roleManager);
+                await SeedData.SeedInactiveUsersAsync(userManager);
                 await SeedData.SeedBasicUsersAsync(userManager);
                 await SeedData.SeedAdminUsersAsync(userManager);
                 await SeedData.SeedSuperAdminUsersAsync(userManager, roleManager);

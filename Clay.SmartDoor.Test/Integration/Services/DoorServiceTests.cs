@@ -5,6 +5,7 @@ using Clay.SmartDoor.Core.Interfaces.InfrastructureServices;
 using Clay.SmartDoor.Core.Models.Constants;
 using Clay.SmartDoor.Core.Services;
 using Clay.SmartDoor.Test.Helper;
+using Microsoft.AspNetCore.Identity;
 using Moq;
 using Serilog;
 using Shouldly;
@@ -22,12 +23,18 @@ namespace Clay.SmartDoor.Test.Integration.Services
         private readonly Mock<ILogger> mockLogger = new();
         private readonly Mock<IDoorRepository> mockDoorRepository = new();
         private readonly Mock<IActivityLogRepository> mockActivityLogRepository = new();
-        private readonly Mock<IUnitOfWork> mockUnitOfWork = new();
+        private readonly Mock<IUnitOfWork> _mockUnitOfWork = new();
+        private readonly Mock<IDoorAssignmentRepository> _mockDoorAssignmentRepo = new();
+        private readonly Mock<UserManager<AppUser>> _mockUserManager;
+
         public DoorServiceTests()
         {
-            _sut = new DoorService(mockUnitOfWork.Object, mockLogger.Object);
-            mockUnitOfWork.Setup(uow => uow.Doors).Returns(mockDoorRepository.Object);
-            mockUnitOfWork.Setup(uow => uow.ActivityLogs).Returns(mockActivityLogRepository.Object);
+            _mockUserManager = MockHelpers.MockUserManager<AppUser>(TestDataGenerator.DummyUsers);
+            _mockUnitOfWork.Setup(uow => uow.Doors).Returns(mockDoorRepository.Object);
+            _mockUnitOfWork.Setup(uow => uow.ActivityLogs).Returns(mockActivityLogRepository.Object);
+            _mockUnitOfWork.Setup(x => x.DoorAssignments).Returns(_mockDoorAssignmentRepo.Object);
+
+            _sut = new DoorService(_mockUserManager.Object, _mockUnitOfWork.Object, mockLogger.Object);
         }
 
         [Fact]
@@ -49,8 +56,8 @@ namespace Clay.SmartDoor.Test.Integration.Services
                 DoorTag = door.NameTag,
             };
 
-            mockUnitOfWork.Setup(t => t.Doors.AddAsync(door));
-            mockUnitOfWork.Setup(t => t.ActivityLogs.AddAsync(activityLog));
+            _mockUnitOfWork.Setup(t => t.Doors.AddAsync(door));
+            _mockUnitOfWork.Setup(t => t.ActivityLogs.AddAsync(activityLog));
 
             // Act
 
@@ -66,8 +73,8 @@ namespace Clay.SmartDoor.Test.Integration.Services
         public async Task CreateNewDoorAsync_ShouldHandleExceptionAndReturnFailedResponse_WhenAnyFailsToAdd()
         {
             // Arrange
-            mockUnitOfWork.Setup(t => t.Doors.AddAsync(It.IsAny<Door>())).ThrowsAsync(new Exception());
-            mockUnitOfWork.Setup(t => t.ActivityLogs.AddAsync(It.IsAny<ActivityLog>())).ThrowsAsync(new Exception());
+            _mockUnitOfWork.Setup(t => t.Doors.AddAsync(It.IsAny<Door>())).ThrowsAsync(new Exception());
+            _mockUnitOfWork.Setup(t => t.ActivityLogs.AddAsync(It.IsAny<ActivityLog>())).ThrowsAsync(new Exception());
 
             // Act
 
@@ -83,7 +90,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
         public async Task ExitDoorAsync_ShouldReturnSuccessResponse_WhenDoorExists()
         {
             // Arrange
-            mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(TestDataGenerator.DefaultDoor);
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(TestDataGenerator.DefaultDoor);
 
             // Act
             var result = await _sut.ExitDoorAsync(TestDataGenerator.Default_Id, TestDataGenerator.ActionBy);
@@ -99,7 +106,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
         {
             // Arrange
             Door door = null!;
-            mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(door);
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(door);
 
             // Act
             var result = await _sut.ExitDoorAsync(TestDataGenerator.Default_Id, TestDataGenerator.ActionBy);
@@ -115,7 +122,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
         {
             // Arrange
             List<Door> doors = new();
-            mockUnitOfWork.Setup(uow => uow.Doors.GetAllDoorsAsync()).Returns(doors.AsQueryable());
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetAllDoorsAsync()).Returns(doors.AsQueryable());
 
             // Act
             var result = await _sut.GetDoorsAsync();
@@ -137,9 +144,9 @@ namespace Clay.SmartDoor.Test.Integration.Services
                 Guid.NewGuid().ToString(),
                 Guid.NewGuid().ToString()
             };
-           
+
             var doors = TestDataGenerator.GenerateDummyDoors(doorIds);
-            mockUnitOfWork.Setup(uow => uow.Doors.GetAllDoorsAsync()).Returns(doors.AsQueryable());
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetAllDoorsAsync()).Returns(doors.AsQueryable());
 
             // Act
             var result = await _sut.GetDoorsAsync();
@@ -163,7 +170,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
             };
 
             var doors = TestDataGenerator.GenerateDummyDoors(doorIds);
-            mockUnitOfWork.Setup(uow => uow.Doors.GetAllDoorsAsync()).Throws(new Exception());
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetAllDoorsAsync()).Throws(new Exception());
 
             // Act
             var result = await _sut.GetDoorsAsync();
@@ -179,7 +186,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
         {
             // Arrange
             Door door = null!;
-            mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(door);
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(door);
 
             // Act
             var result = await _sut.GetDoorByIdAsync("qyuiweyweuhuier");
@@ -196,7 +203,7 @@ namespace Clay.SmartDoor.Test.Integration.Services
         {
             // Arrange
             Door door = TestDataGenerator.DefaultDoor;
-            mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(door.Id)).ReturnsAsync(door);
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(door.Id)).ReturnsAsync(door);
 
             // Act
             var result = await _sut.GetDoorByIdAsync(door.Id);
@@ -213,18 +220,17 @@ namespace Clay.SmartDoor.Test.Integration.Services
         public async Task OpenDoorAsync_ShouldReturnForbiddenResponse_WhenUserDoesNotBelongToAccessGroup()
         {
             // Arrange
-            var requestModel = new DoorAccessRequest
-            {
-                DoorId = TestDataGenerator.Default_Door_Id
-            };
             DoorAssignment doorAssignment = null!;
             Door door = TestDataGenerator.DefaultDoor;
-            mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(door);
-            mockUnitOfWork.Setup(uow => uow.DoorAssignments
-                        .GetDoorAssignmentAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(doorAssignment);
+            AppUser user = TestDataGenerator.BasicUser;
+
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(door.Id)).ReturnsAsync(door);
+            _mockUserManager.Setup(x => x.FindByIdAsync(user.Id)).ReturnsAsync(user);
+            _mockUnitOfWork.Setup(uow => uow.DoorAssignments
+                        .GetDoorAssignmentAsync(door.Id, user.AccessGroupId)).ReturnsAsync(doorAssignment);
 
             // Act
-            var result = await _sut.OpenDoorAsync(requestModel, It.IsAny<string>());
+            var result = await _sut.OpenDoorAsync(door.Id, user.Id);
 
             // Assert
             result.StatusCode.ShouldBe((int)HttpStatusCode.Forbidden);
@@ -236,19 +242,15 @@ namespace Clay.SmartDoor.Test.Integration.Services
         public async Task OpenDoorAsync_ShouldHandleExceptionAndReturnFailedResponse_WhenAnyFailsToAdd()
         {
             // Arrange
-            var requestModel = new DoorAccessRequest
-            {
-                DoorId = TestDataGenerator.Default_Door_Id
-            };
-
+            var doorId = TestDataGenerator.Default_Door_Id;
             Door door = TestDataGenerator.DefaultDoor;
 
-            mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(door);
-            mockUnitOfWork.Setup(uow => uow.DoorAssignments
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(door);
+            _mockUnitOfWork.Setup(uow => uow.DoorAssignments
                         .GetDoorAssignmentAsync(It.IsAny<string>(), It.IsAny<string>())).Throws(new Exception());
 
             // Act
-            var result = await _sut.OpenDoorAsync(requestModel, It.IsAny<string>());
+            var result = await _sut.OpenDoorAsync(doorId, It.IsAny<string>());
 
             // Assert
             result.StatusCode.ShouldBe((int)HttpStatusCode.BadRequest);
@@ -260,27 +262,24 @@ namespace Clay.SmartDoor.Test.Integration.Services
         public async Task OpenDoorAsync_ShouldReturnOkResponse_WhenDoorOpens()
         {
             // Arrange
-            var requestModel = new DoorAccessRequest
-            {
-                DoorId = TestDataGenerator.Default_Door_Id,
-                AccessGroupId = TestDataGenerator.Default_AccessGroup
-            };
-
+            var user = TestDataGenerator.SuperAdminUser;
+            var doorId = TestDataGenerator.Default_Door_Id;
             Door door = TestDataGenerator.DefaultDoor;
 
             var doorAssignment = new DoorAssignment
             {
-                DoorId = TestDataGenerator.Default_Door_Id,
-                AccessGroupId = TestDataGenerator.Default_AccessGroup,
+                DoorId = doorId,
+                AccessGroupId = user.AccessGroupId,
                 Assigned = true
             };
 
-            mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(door);
-            mockUnitOfWork.Setup(uow => uow.DoorAssignments
+            _mockUnitOfWork.Setup(uow => uow.Doors.GetDoorAsync(It.IsAny<string>())).ReturnsAsync(door);
+            _mockUserManager.Setup(x => x.FindByIdAsync(user.Id)).ReturnsAsync(user);
+            _mockUnitOfWork.Setup(uow => uow.DoorAssignments
                         .GetDoorAssignmentAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(doorAssignment);
 
             // Act
-            var result = await _sut.OpenDoorAsync(requestModel, It.IsAny<string>());
+            var result = await _sut.OpenDoorAsync(doorId, user.Id);
 
             // Assert
             result.StatusCode.ShouldBe((int)HttpStatusCode.OK);
